@@ -1,0 +1,3602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visual Query</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Roboto:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   EXCISE DESIGN SYSTEM — design tokens (from Design Handbook v1.0)
+   ============================================================ */
+:root{
+  /* Primary — Blue */
+  --blue-50:#DBF0FF; --blue-100:#B8D8FF; --blue-200:#71B8FF; --blue-300:#2894FF;
+  --blue-400:#0070DF; --blue-500:#004C97; --blue-600:#003D7A; --blue-700:#002E5C;
+  --blue-800:#001F3D; --blue-900:#000F1F;
+  /* Secondary — Amber */
+  --amber-100:#FDFD07; --amber-100b:#FDFDD7; --amber-200:#FDDFAF; --amber-300:#FDD087;
+  --amber-400:#FCC05F; --amber-500:#FBB033; --amber-600:#FD9605; --amber-700:#B47003;
+  --amber-800:#784803; --amber-900:#3C2501;
+  /* Neutral */
+  --gray-50:#F7F7F7; --gray-100:#F0F0F0; --gray-200b:#E0E1E0; --gray-300:#D1D2D1;
+  --gray-400:#C1C3C1; --gray-500:#B2B4B2; --gray-600:#8E908D; --gray-700:#696B69;
+  --gray-800:#464846; --gray-900:#232423; --gray-950:#121212;
+  /* Semantic backgrounds / foregrounds */
+  --bg-page:#F8F9FD; --bg-surface:#FFFFFF; --bg-subtle:#F5F5F5; --bg-muted:#F0F0F0;
+  --fg-primary:#232423; --fg-secondary:#464846; --fg-tertiary:#696B69; --fg-brand:#004C97;
+  /* Semantic roles */
+  --c-error:#F04438; --c-error-bg:#FEF3F2; --c-success:#4F7A0D; --c-success-bg:#F3FAE8;
+  --c-warning:#A15C07; --c-warning-bg:#FFFBE8; --c-info:#004C97; --c-info-bg:#DBF0FF;
+  /* Spacing scale */
+  --space-2xs:2px; --space-xs:4px; --space-s:8px; --space-m:12px; --space-l:16px;
+  --space-xl:20px; --space-2xl:24px; --space-3xl:32px; --space-4xl:40px;
+  /* Radius */
+  --radius-xs:4px; --radius-s:8px; --radius-m:12px; --radius-l:16px; --radius-xl:24px; --radius-full:9999px;
+  /* Shadows */
+  --shadow-xs:0 1px 2px rgba(35,36,35,.06);
+  --shadow-s:0 2px 8px rgba(35,36,35,.08);
+  --shadow-l:0 8px 24px rgba(35,36,35,.12);
+  --shadow-xl:0 16px 48px rgba(35,36,35,.18);
+  /* Fonts */
+  --font-th:'Roboto', 'Noto Sans Thai', sans-serif;
+  --font-ui:'Roboto', 'Noto Sans Thai', sans-serif;
+}
+
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; font-family:var(--font-th); color:var(--fg-primary); background:var(--bg-page);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;}
+::selection{background:var(--blue-100);}
+
+.app{ height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+/* ---------------- Navbar ---------------- */
+.navbar{
+  height:56px; flex:0 0 56px; background:var(--bg-surface); border-bottom:1px solid var(--gray-300);
+  display:flex; align-items:center; justify-content:space-between; padding:0 var(--space-l);
+  position:relative; z-index:30;
+}
+.navbar-left{ display:flex; align-items:center; gap:var(--space-m); }
+.logo{
+  width:32px;height:32px;border-radius:var(--radius-s); background:var(--blue-500);
+  display:flex; align-items:center; justify-content:center; color:#fff; flex:0 0 auto;
+}
+.app-title{ font-weight:700; font-size:20px; color:var(--fg-primary); }
+.navbar-right{ display:flex; align-items:center; gap:var(--space-m); }
+.icon-btn{
+  width:34px;height:34px; border-radius:var(--radius-full); border:none; background:transparent;
+  color:var(--fg-tertiary); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:background .12s;
+}
+.icon-btn:hover{ background:var(--bg-subtle); color:var(--fg-brand); }
+.avatar{
+  width:32px;height:32px;border-radius:var(--radius-full); background:var(--blue-500); color:#fff;
+  display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;
+}
+.navbar-tabs{ display:none; align-items:center; gap:4px; margin-left:var(--space-l); }
+.nav-tab{
+  height:32px; padding:0 var(--space-l); border-radius:var(--radius-full); border:none; background:none;
+  font-size:14px; font-weight:600; color:var(--fg-secondary); cursor:pointer; transition:background .12s,color .12s;
+}
+.nav-tab:hover:not(.active){ color:var(--fg-brand); }
+.nav-tab.active{ background:var(--bg-subtle); color:var(--fg-primary); }
+.navbar-user-label{ display:none; font-size:14px; font-weight:600; color:var(--fg-brand); }
+
+/* ---------------- Full-screen data view ---------------- */
+.app.fullscreen .canvas-viewport,
+.app.fullscreen .panel-tabs,
+.app.fullscreen .panel-resize-handle{ display:none !important; }
+.app.fullscreen .bottom-panel{ flex:1 1 auto; border-top:none; }
+
+/* ---------------- Toolbar ---------------- */
+.toolbar{
+  flex:0 0 44px; height:44px; background:var(--bg-surface); border-bottom:1px solid var(--gray-200b);
+  display:flex; align-items:center; gap:2px; padding:0 var(--space-l); position:relative; z-index:20;
+}
+.tb-btn{
+  display:flex; align-items:center; gap:6px; height:30px; padding:0 var(--space-m);
+  border-radius:var(--radius-s); border:none; background:transparent; color:var(--fg-secondary);
+  font-size:13px; font-weight:600; cursor:pointer; transition:background .12s,color .12s;
+}
+.tb-btn svg{ width:15px;height:15px; }
+.tb-btn:hover:not(:disabled){ background:var(--bg-subtle); color:var(--fg-brand); }
+.tb-btn:disabled{ color:var(--gray-400); cursor:not-allowed; }
+.tb-btn.tb-danger:hover:not(:disabled){ color:var(--c-error); background:var(--c-error-bg); }
+.tb-btn.tb-primary{ background:var(--blue-500); color:#fff; }
+.tb-btn.tb-primary:hover:not(:disabled){ background:var(--blue-600); color:#fff; }
+.tb-divider{ width:1px; height:20px; background:var(--gray-300); margin:0 var(--space-s); }
+
+/* ---------------- Workspace ---------------- */
+.workspace{ flex:1 1 auto; display:flex; min-height:0; position:relative; }
+
+/* Right-hand column: canvas + bottom data panel, always to the right of
+   the sidebar so the data area never underlaps/overlaps it */
+.workspace-main{
+  flex:1 1 auto; display:flex; flex-direction:column; min-width:0; min-height:0; position:relative;
+}
+
+/* Sidebar */
+.sidebar{
+  width:240px; flex:0 0 240px; background:var(--bg-surface); border-right:1px solid var(--gray-200b);
+  overflow-y:auto; overflow-x:hidden; padding:var(--space-m) 0;
+  transition:flex-basis .2s ease, width .2s ease, opacity .2s ease, padding .2s ease;
+}
+.sidebar.collapsed{
+  flex-basis:0; width:0; padding-top:0; padding-bottom:0; opacity:0; border-right-color:transparent;
+}
+.sidebar-toggle{
+  position:absolute; top:var(--space-l); left:240px; transform:translateX(-50%); z-index:30;
+  width:32px;height:32px; border-radius:var(--radius-full); background:var(--bg-surface);
+  border:1px solid var(--gray-300); box-shadow:var(--shadow-s); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--fg-secondary); padding:0; transition:left .2s ease;
+}
+.sidebar-toggle:hover{ background:var(--bg-subtle); color:var(--fg-brand); }
+.sidebar-toggle svg{ width:15px;height:15px; transition:transform .2s ease; }
+.workspace.sidebar-collapsed .sidebar-toggle{ left:0; }
+.workspace.sidebar-collapsed .sidebar-toggle svg{ transform:rotate(180deg); }
+.tree-item{
+  display:flex; align-items:center; gap:8px; padding:6px var(--space-l); font-size:13px;
+  color:var(--fg-secondary); cursor:pointer; user-select:none; white-space:nowrap;
+}
+.tree-item svg{ width:15px;height:15px; flex:0 0 auto; }
+.tree-item.folder{ font-weight:600; color:var(--fg-primary); }
+.tree-item.folder .chev{ transition:transform .15s; }
+.tree-item.folder.collapsed .chev{ transform:rotate(-90deg); }
+.tree-children{ }
+.tree-children.collapsed{ display:none; }
+.tree-children .tree-children{ padding-left:16px; }
+.tree-item.table-item{ padding-left:36px; color:var(--fg-secondary); cursor:grab; }
+.tree-item.table-item:hover{ background:var(--bg-subtle); color:var(--fg-brand); }
+.tree-item.table-item:active{ cursor:grabbing; }
+.tree-item.table-item.active{ color:var(--fg-brand); font-weight:600; }
+.tree-item.table-item.dragging-row{ opacity:.4; }
+.table-dot{
+  width:6px;height:6px;border-radius:50%; background:var(--blue-500); margin-left:auto; flex:0 0 auto;
+  opacity:0;
+}
+.tree-item.table-item.active .table-dot{ opacity:1; }
+
+/* Saved views (under the "view" folder) */
+.view-entry-folder{ }
+.view-entry-children{ padding-bottom:2px; }
+.view-entry-children.collapsed{ display:none; }
+.view-mode-item{ color:var(--fg-secondary); }
+.view-mode-item:hover{ background:var(--bg-subtle); color:var(--fg-brand); }
+.view-mode-item.active{ color:var(--fg-brand); font-weight:600; }
+.view-mode-item.active svg{ color:var(--fg-brand); }
+.view-divider{ height:1px; background:var(--gray-200b); margin:6px 16px 6px 56px; }
+.view-toggle-row{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:5px 16px 5px 56px; font-size:12.5px; color:var(--fg-secondary);
+}
+.toggle-switch{
+  position:relative; width:32px; height:18px; border-radius:var(--radius-full);
+  border:none; background:var(--gray-400); cursor:pointer; padding:0; flex:0 0 auto; transition:background .15s;
+}
+.toggle-switch .toggle-knob{
+  position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%;
+  background:#fff; box-shadow:var(--shadow-xs); transition:left .15s;
+}
+.toggle-switch.on{ background:var(--blue-500); }
+.toggle-switch.on .toggle-knob{ left:16px; }
+.view-delete-btn{
+  display:flex; align-items:center; gap:8px; width:calc(100% - 16px); margin:4px 8px 4px 48px;
+  padding:6px 10px; border:none; background:transparent; border-radius:var(--radius-s);
+  color:var(--c-error); font-size:12.5px; font-weight:600; cursor:pointer; transition:background .12s;
+}
+.view-delete-btn svg{ width:14px;height:14px; }
+.view-delete-btn:hover{ background:var(--c-error-bg); }
+
+/* Canvas */
+.canvas-viewport{
+  flex:1 1 auto; position:relative; overflow:hidden; min-width:0; min-height:0;
+}
+.canvas-wrap{
+  position:absolute; inset:0; overflow:hidden; background-color:var(--bg-page);
+  background-image:radial-gradient(var(--gray-300) 1px, transparent 1px);
+  background-size:18px 18px;
+}
+.canvas-wrap.panning{ cursor:grabbing; }
+.canvas-wrap.drop-target{ box-shadow:inset 0 0 0 3px var(--blue-300); }
+.canvas{
+  position:absolute; top:0; left:0; width:3000px; height:2000px;
+  transform-origin:0 0;
+}
+.conn-layer{ position:absolute; top:0; left:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+.nodes-layer{ position:absolute; top:0; left:0; width:100%; height:100%; }
+.pill-layer{ position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:5; }
+
+/* Table node */
+.tnode{
+  position:absolute; width:224px; background:var(--bg-surface); border:1px solid var(--gray-300);
+  border-radius:var(--radius-m); box-shadow:var(--shadow-s);
+}
+.tnode.dragging{ box-shadow:var(--shadow-l); z-index:15; }
+.tnode-head{
+  height:32px; background:var(--blue-500); color:#fff; display:flex; align-items:center;
+  justify-content:space-between; padding:0 10px; font-size:13px; font-weight:700; cursor:grab;
+  border-radius:var(--radius-m) var(--radius-m) 0 0;
+}
+.tnode-head:active{ cursor:grabbing; }
+.tnode-title-wrap{ display:flex; align-items:center; gap:8px; min-width:0; flex:1 1 auto; }
+.tnode-title{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tnode-close{
+  width:24px;height:24px; border-radius:50%; border:none; background:rgba(255,255,255,.16); color:#fff;
+  display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto;
+}
+.tnode-close:hover{ background:rgba(255,255,255,.32); }
+.tnode-close svg{ width:14px;height:14px; }
+.tnode-body{ }
+.trow{
+  display:flex; align-items:center; gap:8px; height:28px; padding:0 10px; font-size:12.5px;
+  border-bottom:1px solid var(--bg-muted); position:relative; cursor:pointer; transition:background .1s;
+}
+.trow:last-child{ border-bottom:none; }
+.trow:hover{ background:var(--bg-subtle); }
+.trow.locked{ background:var(--blue-50); }
+.trow.locked:hover{ background:#CFE6FF; }
+.trow.dim{ opacity:.55; }
+.col-filter-badge{
+  display:flex; align-items:center; justify-content:center; color:var(--fg-brand); flex:0 0 auto; margin-left:1px;
+}
+.col-filter-badge svg{ width:12px;height:12px; }
+.chk{
+  width:14px;height:14px;border-radius:4px;border:1.5px solid var(--gray-400); flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center; cursor:pointer; background:#fff;
+}
+.chk svg{ width:10px;height:10px; opacity:0; }
+.chk.checked{ background:var(--blue-500); border-color:var(--blue-500); }
+.chk.checked svg{ opacity:1; stroke:#fff; }
+.chk.locked{ background:var(--gray-300); border-color:var(--gray-300); cursor:pointer; }
+.chk.locked svg{ opacity:1; stroke:var(--gray-700); }
+.chk-head{ border-color:rgba(255,255,255,.75); background:transparent; }
+.chk-head.checked, .chk-head.indeterminate{ background:#fff; border-color:#fff; }
+.chk-head.checked svg, .chk-head.indeterminate svg{ opacity:1; stroke:var(--blue-500); }
+.col-name-wrap{ display:flex; align-items:center; gap:4px; flex:1 1 auto; min-width:0; }
+.col-name{ flex:0 1 auto; min-width:0; color:var(--fg-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:var(--font-ui); }
+.trow.locked .col-name{ color:var(--fg-tertiary); }
+.col-type{ font-style:italic; color:var(--gray-600); font-size:11px; flex:0 0 auto; font-family:var(--font-ui); }
+.dot-l, .dot-r{
+  position:absolute; top:50%; transform:translateY(-50%); width:9px;height:9px;border-radius:50%;
+  background:var(--bg-surface); border:2px solid var(--blue-400); cursor:crosshair; opacity:0; transition:opacity .1s, transform .1s;
+}
+.dot-l{ left:-5px; } .dot-r{ right:-5px; }
+.trow:hover .dot-l, .trow:hover .dot-r{ opacity:1; }
+.dot-l:hover, .dot-r:hover{ transform:translateY(-50%) scale(1.4); background:var(--blue-400); }
+
+/* join pill on connection */
+.join-pill{
+  position:absolute; transform:translate(-50%,-50%); display:flex; align-items:center; justify-content:space-between;
+  box-sizing:border-box; width:72px; height:24px;
+  background:var(--bg-surface); border:1px solid var(--gray-300); border-radius:var(--radius-full);
+  padding:3px 8px 3px 10px; font-size:11px; font-weight:600; color:var(--fg-secondary); cursor:pointer;
+  box-shadow:var(--shadow-xs); white-space:nowrap; user-select:none; pointer-events:auto;
+}
+.join-pill:hover{ border-color:var(--blue-400); color:var(--fg-brand); }
+.join-pill svg{ width:11px;height:11px; flex:0 0 auto; }
+.join-menu{
+  position:absolute; background:var(--bg-surface); border:1px solid var(--gray-300); border-radius:var(--radius-s);
+  box-shadow:var(--shadow-l); padding:4px; z-index:60; min-width:80px;
+}
+.join-menu button{
+  display:block; width:100%; text-align:left; padding:6px 10px; border:none; background:none;
+  font-size:12.5px; border-radius:var(--radius-xs); cursor:pointer; color:var(--fg-primary);
+}
+.join-menu button:hover{ background:var(--bg-subtle); color:var(--fg-brand); }
+.join-menu button.sel{ color:var(--fg-brand); font-weight:700; }
+
+.user-menu{
+  position:absolute; background:var(--bg-surface); border:1px solid var(--gray-300); border-radius:var(--radius-s);
+  box-shadow:var(--shadow-l); padding:6px; z-index:120; min-width:180px;
+}
+.user-menu-header{ padding:8px 10px 6px; }
+.user-menu-name{ font-size:13.5px; font-weight:700; color:var(--fg-primary); }
+.user-menu-role{ font-size:12px; color:var(--fg-tertiary); margin-top:1px; }
+.user-menu-divider{ height:1px; background:var(--gray-200b); margin:4px 2px; }
+.user-menu-item{
+  display:flex; align-items:center; gap:8px; width:100%; text-align:left; padding:8px 10px; border:none;
+  background:none; font-size:13px; font-weight:600; border-radius:var(--radius-xs); cursor:pointer; color:var(--fg-primary);
+}
+.user-menu-item svg{ width:15px;height:15px; flex:0 0 auto; }
+.user-menu-item:hover{ background:var(--c-error-bg); color:var(--c-error); }
+
+/* zoom controls */
+.zoom-controls{
+  position:absolute; left:0; bottom:var(--space-l); display:flex; flex-direction:column;
+  background:var(--bg-surface); border:1px solid var(--gray-300); border-left:none;
+  border-radius:0 var(--radius-s) var(--radius-s) 0;
+  box-shadow:var(--shadow-s); overflow:hidden; z-index:25;
+}
+.zoom-controls button{
+  width:32px;height:32px; border:none; background:none; border-bottom:1px solid var(--gray-200b);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--fg-secondary);
+}
+.zoom-controls button:last-child{ border-bottom:none; }
+.zoom-controls button:hover{ background:var(--bg-subtle); color:var(--fg-brand); }
+.zoom-controls button.active{ color:var(--fg-brand); background:var(--blue-50); }
+.zoom-controls svg{ width:15px;height:15px; }
+
+/* minimap */
+.minimap-dock{
+  position:absolute; right:0; bottom:var(--space-l); z-index:25;
+}
+.minimap{
+  width:150px;height:96px;
+  background:rgba(255,255,255,.9); border:1px solid var(--gray-300); border-right:none;
+  border-radius:var(--radius-s) 0 0 var(--radius-s);
+  box-shadow:var(--shadow-s); overflow:hidden;
+  transition:width .18s ease, opacity .18s ease, border-width .18s ease;
+}
+.minimap-toggle{
+  position:absolute; top:50%; left:0; transform:translate(-50%,-50%); z-index:2;
+  width:32px;height:32px; border-radius:var(--radius-full); background:var(--bg-surface);
+  border:1px solid var(--gray-300); box-shadow:var(--shadow-s); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--fg-secondary); padding:0; transition:left .18s ease;
+}
+.minimap-toggle:hover{ background:var(--bg-subtle); color:var(--fg-brand); }
+.minimap-toggle svg{ width:15px;height:15px; transition:transform .18s ease; }
+.minimap-dock.collapsed .minimap{ width:0; border-width:0; opacity:0; }
+.minimap-dock.collapsed .minimap-toggle svg{ transform:rotate(180deg); }
+
+/* ---------------- Bottom panel ---------------- */
+.bottom-panel{
+  position:relative; flex:0 0 260px; background:var(--bg-surface); border-top:1px solid var(--gray-300);
+  display:flex; flex-direction:column; min-height:0; min-width:0; width:100%;
+  transition:flex-basis .18s ease;
+}
+.bottom-panel.expanded{ flex-basis:70vh; }
+.bottom-panel.resizing{ transition:none; }
+.panel-resize-handle{
+  position:absolute; top:0; left:50%; transform:translate(-50%,-50%); z-index:10;
+  width:56px; height:20px; border-radius:var(--radius-full); background:var(--bg-surface);
+  border:1px solid var(--gray-300); box-shadow:var(--shadow-s); color:var(--gray-500);
+  display:flex; align-items:center; justify-content:center;
+  cursor:row-resize; touch-action:none; padding:0;
+}
+.panel-resize-handle:hover{ border-color:var(--blue-400); color:var(--fg-brand); }
+.panel-resize-handle:active{ color:var(--fg-brand); }
+.panel-resize-handle .prh-icon{ width:16px;height:16px; transition:color .12s; }
+.panel-tabs{
+  flex:0 0 auto; min-height:38px; display:flex; align-items:center; padding:0 var(--space-m); gap:2px;
+  border-bottom:1px solid var(--gray-200b); flex-wrap:wrap;
+}
+.panel-tab{
+  height:38px; padding:0 var(--space-m); border:none; background:none; font-size:13px; font-weight:700;
+  color:var(--fg-tertiary); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
+}
+.panel-tab.active{ color:var(--fg-brand); border-bottom-color:var(--blue-500); }
+.panel-spacer{ flex:1 1 auto; }
+.fs-btn{
+  display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--fg-tertiary);
+  background:none; border:none; cursor:pointer; padding:6px 8px; border-radius:var(--radius-xs);
+  margin-left:auto; flex:0 0 auto; white-space:nowrap;
+}
+.fs-btn:hover{ color:var(--fg-brand); background:var(--bg-subtle); }
+.fs-btn svg{ width:13px;height:13px; flex:0 0 auto; }
+.app.fullscreen .fs-btn { display:none; }
+
+/* The new Minimize Button (visible only in full screen mode) */
+.min-btn{
+  display:none; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--fg-tertiary);
+  background:none; border:none; cursor:pointer; padding:6px 8px; border-radius:var(--radius-xs);
+  margin-left:auto; flex:0 0 auto; white-space:nowrap;
+}
+.min-btn:hover{ color:var(--fg-brand); background:var(--bg-subtle); }
+.min-btn svg{ width:13px;height:13px; flex:0 0 auto; }
+.app.fullscreen .min-btn { display:flex; }
+
+/* Collapse button labels to icons only once space gets tight, so the
+   Full Screen / Minimize Screen actions never get clipped or pushed off-screen */
+@media (max-width: 640px){
+  .export-btn .btn-label,
+  .fs-btn .btn-label,
+  .min-btn .btn-label{ display:none; }
+  .export-btn, .fs-btn, .min-btn{ padding:6px; }
+}
+
+.panel-body{ flex:1 1 auto; overflow:auto; min-height:0; }
+.tab-content{ height:100%; display:flex; flex-direction:column; }
+.tab-content[hidden]{ display:none; }
+
+/* Data table */
+.data-toolbar{
+  flex:0 0 auto; padding:var(--space-s) var(--space-l); display:flex; align-items:center; gap:var(--space-m);
+  border-bottom:1px solid var(--bg-muted); flex-wrap:wrap; row-gap:8px; min-width:0;
+}
+.export-btn{
+  display:flex; align-items:center; gap:6px; height:30px; padding:0 var(--space-m);
+  font-size:12.5px; font-weight:600; color:var(--fg-secondary); font-family:var(--font-ui);
+  background:var(--bg-surface); border:1.5px solid var(--gray-300); border-radius:var(--radius-s); cursor:pointer;
+  flex:0 0 auto; white-space:nowrap;
+}
+.export-btn:hover{ border-color:var(--blue-400); color:var(--fg-brand); }
+.export-btn svg{ width:14px;height:14px; flex:0 0 auto; }
+.rpp-inline{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--fg-tertiary); flex:0 0 auto; white-space:nowrap; }
+.data-scroll{ flex:1 1 auto; overflow:auto; }
+table.dgrid{ border-collapse:collapse; width:max-content; min-width:100%; font-family:var(--font-ui); }
+table.dgrid thead th{
+  position:sticky; top:0; background:var(--blue-500); color:#fff; text-align:left; font-size:12px;
+  font-weight:700; padding:8px 14px; white-space:nowrap; z-index:2;
+}
+table.dgrid tbody td{
+  padding:7px 14px; font-size:12.5px; color:var(--fg-primary); white-space:nowrap; border-bottom:1px solid var(--bg-muted);
+}
+table.dgrid tbody tr:nth-child(even){ background:var(--bg-page); }
+table.dgrid tbody tr:hover{ background:var(--blue-50); }
+
+/* Updated Data Footer with fixed pagination layout */
+.data-footer {
+  flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-m) var(--space-l); border-top: 1px solid var(--bg-muted);
+  font-size: 12px; color: var(--fg-tertiary); background: #fff;
+  flex-wrap: wrap; gap: 12px; min-width: 0;
+}
+.data-footer > div:first-child{ white-space:nowrap; }
+.footer-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; min-width:0; }
+.footer-rpp { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; white-space:nowrap; flex:0 0 auto; }
+.pager { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; flex:0 0 auto; }
+.pager button {
+  min-width: 28px; height: 28px; border: none; border-radius: 14px; background: var(--gray-100);
+  font-size: 12.5px; color: var(--fg-secondary); cursor: pointer; padding: 0 8px; font-family: var(--font-ui);
+  display: flex; align-items: center; justify-content: center; transition: background .15s; flex:0 0 auto;
+}
+.pager button:hover:not(:disabled) { background: var(--gray-200b); color: var(--fg-primary); }
+.pager button.cur { background: var(--blue-100); color: var(--blue-600); font-weight: 700; }
+.pager button:disabled { background: none; color: var(--gray-400); cursor: default; }
+
+/* Below this width, stack the footer into clear rows so the pager and its
+   controls always render in full instead of being squeezed or clipped */
+@media (max-width: 640px){
+  .data-footer{ flex-direction: column; align-items: stretch; }
+  .data-footer > div:first-child{ text-align:center; white-space:normal; }
+  .footer-right{ justify-content: center; }
+  .pager{ width: 100%; }
+}
+@media (max-width: 420px){
+  .footer-rpp{ width:100%; justify-content:center; }
+}
+
+.rpp-trigger{
+  display:inline-flex; align-items:center; gap:6px; border:1px solid var(--gray-300); border-radius:var(--radius-s);
+  font-size:12px; font-weight:600; padding:4px 8px; color:var(--fg-secondary); background:#fff; cursor:pointer;
+}
+.rpp-trigger:hover{ border-color:var(--fg-brand); color:var(--fg-brand); }
+.rpp-trigger svg{ width:12px;height:12px; flex:0 0 auto; }
+.rpp-trigger.editing{ cursor:text; padding:2px 4px; }
+.rpp-trigger .rpp-edit-input{
+  width:56px; border:1px solid var(--fg-brand); border-radius:var(--radius-xs); padding:3px 6px;
+  font-size:12px; font-weight:600; color:var(--fg-primary); outline:none;
+}
+
+.rpp-popover{
+  position:absolute; background:var(--bg-surface); border:1px solid var(--gray-300); border-radius:var(--radius-s);
+  box-shadow:var(--shadow-l); padding:6px; z-index:130; min-width:190px;
+}
+.rpp-popover-item{
+  display:block; width:100%; text-align:left; padding:7px 10px; border:none; background:none;
+  font-size:13px; font-weight:600; border-radius:var(--radius-xs); cursor:pointer; color:var(--fg-primary);
+}
+.rpp-popover-item:hover{ background:var(--bg-subtle); color:var(--fg-brand); }
+.rpp-popover-item.sel{ background:var(--bg-subtle); color:var(--fg-brand); }
+.rpp-popover-divider{ height:1px; background:var(--gray-200b); margin:4px 2px; }
+.rpp-popover-hint{ font-size:11px; color:var(--fg-tertiary); padding:6px 10px 2px; line-height:1.4; }
+.empty-state{
+  height:100%; min-height:100%; box-sizing:border-box;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:var(--space-s); color:var(--fg-tertiary); font-size:13px; text-align:center; padding:var(--space-l);
+}
+.empty-state svg{ width:40px;height:40px; color:var(--gray-400); }
+
+/* Toast */
+#toastHost{ position:fixed; top:70px; right:24px; display:flex; flex-direction:column; gap:8px; z-index:200; }
+.toast{
+  display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:var(--radius-s);
+  font-size:13px; font-weight:600; box-shadow:var(--shadow-l); animation:toastIn .18s ease;
+  border:1px solid;
+}
+.toast svg{ width:16px;height:16px; flex:0 0 auto; }
+.toast.success{ background:var(--c-success-bg); color:var(--c-success); border-color:#CDE8AE; }
+.toast.info{ background:var(--c-info-bg); color:var(--fg-brand); border-color:#B8D8FF; }
+@keyframes toastIn{ from{ opacity:0; transform:translateY(-6px);} to{ opacity:1; transform:translateY(0);} }
+
+/* Modal */
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(18,18,18,.45); display:flex; align-items:center; justify-content:center;
+  z-index:150;
+}
+.modal-card{
+  width:320px; background:#fff; border-radius:var(--radius-l); box-shadow:var(--shadow-xl); padding:var(--space-2xl);
+  text-align:center;
+}
+.modal-icon{
+  width:44px;height:44px;border-radius:50%; background:var(--c-error-bg); color:var(--c-error);
+  display:flex; align-items:center; justify-content:center; margin:0 auto var(--space-m);
+}
+.modal-icon svg{ width:22px;height:22px; }
+.modal-title{ font-size:16px; font-weight:700; margin-bottom:6px; }
+.modal-body{ font-size:13px; color:var(--fg-secondary); margin-bottom:var(--space-l); line-height:1.5; }
+.modal-actions{ display:flex; gap:var(--space-s); }
+.btn{
+  flex:1 1 auto; height:38px; border-radius:var(--radius-full); border:1.5px solid transparent; font-size:13px;
+  font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.btn-secondary{ background:#fff; border-color:var(--gray-300); color:var(--fg-primary); }
+.btn-secondary:hover{ border-color:var(--gray-500); }
+.btn-danger{ background:var(--c-error); color:#fff; }
+.btn-danger:hover{ background:#C7372B; }
+
+/* ---------------- Save Query modal ---------------- */
+.modal-backdrop-lg{
+  position:fixed; inset:0; background:rgba(18,18,18,.45); display:flex; align-items:center; justify-content:center;
+  z-index:150; padding:24px;
+}
+.sq-modal{
+  width:800px; max-width:100%; height:660px; max-height:88vh; background:#fff; border-radius:var(--radius-l);
+  box-shadow:var(--shadow-xl); display:flex; flex-direction:column; overflow:hidden;
+}
+.sq-header{ flex:0 0 auto; padding:26px 30px 0; }
+.sq-title{ font-size:21px; font-weight:800; color:var(--fg-primary); margin-bottom:20px; font-family:var(--font-ui); }
+.sq-tabs{ display:flex; gap:28px; border-bottom:1px solid var(--gray-200b); }
+.sq-tab{
+  background:none; border:none; padding:0 0 12px; font-size:14px; font-weight:700; color:var(--fg-tertiary);
+  cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; font-family:var(--font-ui);
+}
+.sq-tab:hover{ color:var(--fg-brand); }
+.sq-tab.active{ color:var(--fg-brand); border-bottom-color:var(--blue-500); }
+.sq-body{ padding:22px 30px 4px; overflow-y:auto; flex:1 1 auto; }
+.sq-desc{ font-size:13px; color:var(--fg-tertiary); margin-bottom:18px; line-height:1.5; }
+.sq-field{ margin-bottom:20px; }
+.sq-label{ font-size:13.5px; font-weight:700; color:var(--fg-primary); display:block; margin-bottom:8px; font-family:var(--font-ui); }
+.sq-label .req{ color:var(--c-error); margin-right:3px; }
+.sq-input, .sq-textarea{
+  width:100%; border:1.5px solid var(--gray-300); border-radius:var(--radius-s); padding:10px 12px;
+  font-size:13.5px; font-family:var(--font-ui); color:var(--fg-primary); background:#fff; outline:none;
+}
+.sq-input::placeholder, .sq-textarea::placeholder{ color:var(--gray-500); }
+.sq-input:focus, .sq-textarea:focus{ border-color:var(--blue-400); }
+select.sq-input{
+  appearance:none; -webkit-appearance:none; cursor:pointer;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23696B69' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat:no-repeat; background-position:right 12px center; background-size:14px; padding-right:34px;
+}
+.sq-textarea{ resize:vertical; min-height:80px; font-family:var(--font-ui); line-height:1.5; }
+.sq-keywords-box{
+  min-height:48px; border:1.5px solid var(--gray-300); border-radius:var(--radius-s); padding:8px;
+  display:flex; flex-wrap:wrap; align-content:flex-start; gap:6px; margin-bottom:8px;
+}
+.sq-keywords-box:empty::before{ content:'ยังไม่มีคำสำคัญที่เพิ่ม'; color:var(--gray-500); font-size:12.5px; padding:4px 2px; }
+.kw-chip{
+  display:flex; align-items:center; gap:6px; background:var(--blue-50); color:var(--fg-brand);
+  font-size:12.5px; font-weight:700; padding:5px 6px 5px 12px; border-radius:var(--radius-full); font-family:var(--font-ui);
+}
+.kw-chip button{
+  width:16px;height:16px; border-radius:50%; border:none; background:rgba(0,76,151,.14); color:var(--fg-brand);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; flex:0 0 auto;
+}
+.kw-chip button svg{ width:8px;height:8px; }
+.kw-chip button:hover{ background:rgba(0,76,151,.28); }
+.sq-hint{ font-size:11.5px; color:var(--gray-600); margin-top:6px; }
+
+.sq-table-wrap{ border:1px solid var(--gray-200b); border-radius:var(--radius-s); overflow:hidden; margin-bottom:12px; }
+table.sq-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+table.sq-table thead th{
+  text-align:left; font-size:12.5px; font-weight:700; color:var(--fg-primary); background:var(--bg-subtle);
+  padding:10px 12px; border-bottom:1px solid var(--gray-200b); font-family:var(--font-ui);
+}
+table.sq-table tbody td{ padding:7px 10px; border-bottom:1px solid var(--bg-muted); vertical-align:middle; }
+table.sq-table tbody tr:last-child td{ border-bottom:none; }
+.sq-cell-input{
+  width:100%; border:1.5px solid var(--gray-300); border-radius:6px; padding:7px 9px; font-size:12.5px;
+  font-family:var(--font-ui); color:var(--fg-primary); background:#fff; outline:none;
+}
+.sq-cell-input::placeholder{ color:var(--gray-500); }
+.sq-cell-input:focus{ border-color:var(--blue-400); }
+select.sq-cell-input{ appearance:none; -webkit-appearance:none; cursor:pointer;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23696B69' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat:no-repeat; background-position:right 8px center; background-size:12px; padding-right:26px;
+}
+.sq-check{
+  width:16px;height:16px; border-radius:4px; border:1.5px solid var(--gray-400); display:flex; align-items:center;
+  justify-content:center; cursor:pointer; background:#fff; margin:0 auto;
+}
+.sq-check svg{ width:10px;height:10px; opacity:0; }
+.sq-check.checked{ background:var(--blue-500); border-color:var(--blue-500); }
+.sq-check.checked svg{ opacity:1; stroke:#fff; }
+.sq-row-del{
+  width:28px;height:28px; border-radius:6px; border:none; background:none; color:var(--gray-500);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.sq-row-del svg{ width:14px;height:14px; }
+.sq-row-del:hover{ background:var(--c-error-bg); color:var(--c-error); }
+.sq-add-link{
+  display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--fg-brand);
+  font-weight:700; font-size:13px; cursor:pointer; padding:4px 2px; font-family:var(--font-ui); margin-bottom:8px;
+}
+.sq-add-link svg{ width:13px;height:13px; }
+.sq-add-link:hover{ text-decoration:underline; }
+.sq-footer{ flex:0 0 auto; padding:18px 30px; border-top:1px solid var(--gray-200b); display:flex; gap:10px; justify-content:flex-end; }
+.sq-btn{
+  height:38px; padding:0 22px; border-radius:var(--radius-full); border:1.5px solid transparent; font-size:13.5px;
+  font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; font-family:var(--font-ui);
+}
+.sq-btn svg{ width:14px;height:14px; }
+.sq-btn-save{ background:var(--blue-500); color:#fff; }
+.sq-btn-save svg{ stroke:#fff; }
+.sq-btn-save:hover:not(:disabled){ background:var(--blue-600); }
+.sq-btn-save:disabled{ background:var(--bg-muted); color:var(--gray-500); cursor:not-allowed; }
+.sq-btn-save:disabled svg{ stroke:var(--gray-500); }
+.sq-btn-cancel{ background:#fff; border-color:var(--gray-300); color:var(--fg-primary); }
+.sq-btn-cancel:hover{ border-color:var(--gray-500); }
+
+/* ---------------- Column filter popover ---------------- */
+#filterPopoverHost{ position:fixed; inset:0; pointer-events:none; z-index:170; }
+.filt-popover{
+  position:fixed; width:360px; max-width:calc(100vw - 20px); background:var(--bg-surface);
+  border:1px solid var(--gray-300); border-radius:var(--radius-m); box-shadow:var(--shadow-l);
+  padding:16px 16px 14px; pointer-events:auto; font-family:var(--font-ui);
+}
+.filt-header{
+  font-size:13.5px; font-weight:700; color:var(--fg-primary); margin-bottom:12px; word-break:break-word;
+  padding-bottom:10px; border-bottom:1px solid var(--gray-200b);
+}
+.filt-section-label{
+  font-size:11px; font-weight:700; color:var(--fg-tertiary); margin-bottom:8px;
+  text-transform:uppercase; letter-spacing:.03em;
+}
+.filt-conn-toggle{ display:flex; gap:6px; margin:8px 0; }
+.filt-conn-btn{
+  flex:1 1 0; height:26px; border-radius:var(--radius-full); border:1.5px solid var(--gray-300); background:#fff;
+  font-size:11.5px; font-weight:700; color:var(--fg-secondary); cursor:pointer; font-family:var(--font-ui);
+}
+.filt-conn-btn:hover{ border-color:var(--blue-400); }
+.filt-conn-btn.active{ background:var(--blue-500); border-color:var(--blue-500); color:#fff; }
+.filt-row{ display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+.filt-op-select{
+  flex:0 0 128px; min-width:0; border:1.5px solid var(--gray-300); border-radius:var(--radius-s); padding:7px 8px;
+  font-size:12px; color:var(--fg-primary); background:#fff; outline:none; font-family:var(--font-ui);
+  appearance:none; -webkit-appearance:none; cursor:pointer;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23696B69' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat:no-repeat; background-position:right 6px center; background-size:12px; padding-right:22px;
+}
+.filt-op-select:focus{ border-color:var(--blue-400); }
+.filt-val-input{
+  flex:1 1 auto; min-width:0; border:1.5px solid var(--gray-300); border-radius:var(--radius-s); padding:7px 9px;
+  font-size:12.5px; color:var(--fg-primary); background:#fff; outline:none; font-family:var(--font-ui);
+}
+.filt-val-input::placeholder{ color:var(--gray-500); }
+.filt-val-input:focus{ border-color:var(--blue-400); }
+.filt-val-input:disabled{ background:var(--bg-muted); color:var(--gray-500); cursor:not-allowed; }
+.filt-row-actions{ display:flex; align-items:center; gap:2px; flex:0 0 auto; }
+.filt-icon-btn{
+  width:26px;height:26px; border-radius:6px; border:none; background:none; display:flex; align-items:center;
+  justify-content:center; cursor:pointer; color:var(--fg-tertiary); flex:0 0 auto; padding:0;
+}
+.filt-icon-btn svg{ width:13px;height:13px; }
+.filt-icon-btn.filt-add{ color:var(--blue-500); }
+.filt-icon-btn.filt-add:hover{ background:var(--blue-50); }
+.filt-icon-btn.filt-del{ color:var(--c-error); }
+.filt-icon-btn.filt-del:hover{ background:var(--c-error-bg); }
+.filt-order-row{ display:flex; gap:8px; margin-bottom:16px; }
+.filt-order-btn{
+  flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 6px;
+  border:1.5px solid var(--gray-300); border-radius:var(--radius-s); background:#fff; cursor:pointer;
+  color:var(--fg-secondary); font-family:var(--font-ui);
+}
+.filt-order-btn:hover{ border-color:var(--blue-400); }
+.filt-order-btn svg{ width:14px;height:14px; }
+.filt-order-btn span{ font-size:11px; font-weight:700; }
+.filt-order-btn.active{ border-color:var(--blue-500); background:var(--blue-50); color:var(--fg-brand); }
+.filt-footer{ display:flex; gap:8px; }
+.filt-btn{
+  flex:1 1 0; height:34px; border-radius:var(--radius-full); border:1.5px solid transparent; font-size:12.5px;
+  font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;
+  font-family:var(--font-ui);
+}
+.filt-btn svg{ width:13px;height:13px; }
+.filt-btn-apply{ background:var(--c-success-bg); color:var(--fg-secondary); }
+.filt-btn-apply svg{ stroke:var(--c-success); }
+.filt-btn-apply:hover{ background:#E4F3D3; }
+.filt-btn-remove{ background:var(--c-error-bg); color:var(--c-error); }
+.filt-btn-remove svg{ stroke:var(--c-error); }
+.filt-btn-remove:hover{ background:#FBDAD7; }
+.filt-btn-cancel{ background:#fff; border-color:var(--gray-300); color:var(--fg-primary); }
+.filt-btn-cancel:hover{ border-color:var(--gray-500); }
+
+/* ============================================================
+   PIVOT MODE — Google Sheets–style pivot table editor
+   ============================================================ */
+.pivot-toolbar{ display:none; }
+.app.mode-pivot #toolbarMain{ display:none !important; }
+.app.mode-pivot .pivot-toolbar{ display:flex !important; }
+.app.mode-pivot .sidebar,
+.app.mode-pivot .sidebar-toggle,
+.app.mode-pivot .canvas-viewport,
+.app.mode-pivot #bottomPanel{ display:none !important; }
+.app.mode-pivot.fullscreen .pivot-editor{ display:none !important; }
+
+
+.pivot-page{
+  display:none; flex:1 1 auto; min-height:0; min-width:0; overflow:hidden; position:relative;
+  background:var(--bg-surface);
+}
+.app.mode-pivot .pivot-page{ display:flex; }
+
+/* ---------- Left: live results grid ---------- */
+.pivot-grid-area{
+  flex:1 1 auto; min-width:0; min-height:0; display:flex; flex-direction:column; overflow:hidden;
+  background:var(--bg-surface);
+}
+
+/* ---------- Left: "Pivot table editor" panel ---------- */
+.pivot-editor{
+  flex:0 0 336px; width:336px; max-width:80vw; min-height:0; display:flex; flex-direction:column; overflow:hidden;
+  border-right:1px solid var(--gray-200b); background:var(--bg-surface);
+  transition:flex-basis .2s ease, width .2s ease, opacity .2s ease, padding .2s ease;
+}
+.pivot-editor.closed{
+  flex-basis:0; width:0; opacity:0; border-right-color:transparent;
+}
+.pivot-editor-toggle{
+  position:absolute; top:var(--space-l); left:336px; transform:translateX(-50%); z-index:30;
+  width:32px;height:32px; border-radius:var(--radius-full); background:var(--bg-surface);
+  border:1px solid var(--gray-300); box-shadow:var(--shadow-s); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--fg-secondary); padding:0; transition:left .2s ease;
+}
+.pivot-editor-toggle:hover{ background:var(--bg-subtle); color:var(--fg-brand); }
+.pivot-editor-toggle svg{ width:15px;height:15px; transition:transform .2s ease; }
+.pivot-page.editor-collapsed .pivot-editor-toggle{ left:0; }
+.pivot-page.editor-collapsed .pivot-editor-toggle svg{ transform:rotate(180deg); }
+.pivot-editor-header{
+  flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:14px 16px; border-bottom:1px solid var(--gray-200b);
+}
+.pivot-editor-title{ display:flex; align-items:center; gap:8px; font-size:15px; font-weight:700; color:var(--fg-primary); }
+.pivot-editor-title svg{ width:18px;height:18px; color:var(--fg-brand); flex:0 0 auto; }
+.pivot-editor-body{ flex:1 1 auto; overflow-y:auto; padding:6px 16px 24px; }
+
+.pivot-section{ padding:14px 0; border-bottom:1px solid var(--gray-200b); }
+.pivot-section:last-child{ border-bottom:none; }
+.pivot-section-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.pivot-section-head > span{ font-size:14px; font-weight:700; color:var(--fg-primary); }
+.pivot-add-btn{
+  display:inline-flex; align-items:center; gap:4px; height:28px; padding:0 10px; border:none; border-radius:var(--radius-s);
+  background:none; color:var(--fg-brand); font-size:12.5px; font-weight:700; font-family:var(--font-ui); cursor:pointer;
+}
+.pivot-add-btn:hover{ background:var(--blue-50); }
+.pivot-field-boxes{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+.pivot-field-boxes:empty{ margin-top:0; }
+
+.pivot-field-box{
+  border:1px solid var(--gray-200b); border-radius:var(--radius-s); background:var(--bg-page); padding:10px 10px 12px;
+}
+.pivot-field-box-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+.pivot-field-box-name{
+  font-size:12.5px; font-weight:700; color:var(--fg-primary); font-family:var(--font-ui);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;
+}
+.pivot-field-box-del{
+  flex:0 0 auto; width:20px;height:20px; border-radius:50%; border:none; background:none; color:var(--fg-tertiary);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0;
+}
+.pivot-field-box-del:hover{ background:var(--c-error-bg); color:var(--c-error); }
+.pivot-field-box-del svg{ width:11px;height:11px; }
+
+.pivot-config-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:7px; }
+.pivot-config-row label{ font-size:11.5px; color:var(--fg-tertiary); flex:0 0 auto; }
+.pivot-select-sm{
+  flex:1 1 auto; min-width:0; max-width:172px; height:28px; border:1.5px solid var(--gray-300); border-radius:var(--radius-xs);
+  padding:0 22px 0 8px; font-size:12px; font-weight:600; color:var(--fg-primary); background:#fff; outline:none;
+  font-family:var(--font-ui); cursor:pointer; appearance:none; -webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23696B69' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat:no-repeat; background-position:right 6px center; background-size:11px;
+  overflow:hidden; text-overflow:ellipsis;
+}
+.pivot-select-sm:focus{ border-color:var(--blue-400); }
+.pivot-checkbox-row{ display:flex; align-items:center; gap:7px; margin-top:9px; font-size:12px; color:var(--fg-secondary); cursor:pointer; }
+.pivot-checkbox-row input{ width:14px;height:14px; accent-color:var(--fg-brand); cursor:pointer; }
+
+.pivot-filter-summary{
+  display:block; width:100%; text-align:left; height:28px; padding:0 10px; border:1.5px solid var(--gray-300);
+  border-radius:var(--radius-xs); background:#fff; font-size:12px; font-weight:600; color:var(--fg-secondary);
+  font-family:var(--font-ui); cursor:pointer;
+}
+.pivot-filter-summary:hover{ border-color:var(--blue-400); color:var(--fg-brand); }
+
+.pivot-field-empty{ padding:16px 6px; text-align:center; color:var(--fg-tertiary); font-size:12.5px; }
+
+/* ---------- Floating popovers: field picker & filter values ---------- */
+.pivot-popover{
+  position:fixed; background:var(--bg-surface); border:1px solid var(--gray-300); border-radius:var(--radius-s);
+  box-shadow:var(--shadow-l); z-index:500; width:266px; max-width:90vw; padding:10px; display:flex; flex-direction:column;
+}
+.pivot-popover-search{
+  flex:0 0 auto; height:32px; border:1.5px solid var(--gray-300); border-radius:var(--radius-s); padding:0 10px;
+  font-size:12.5px; color:var(--fg-primary); outline:none; font-family:var(--font-ui); background:#fff; margin-bottom:8px;
+}
+.pivot-popover-search:focus{ border-color:var(--blue-400); }
+.pivot-popover-list{ max-height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:2px; }
+.pivot-popover-item{
+  display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; text-align:left;
+  height:34px; padding:0 8px; border:none; border-radius:var(--radius-xs); background:none; cursor:pointer;
+  font-size:12.5px; color:var(--fg-primary); font-family:var(--font-ui);
+}
+.pivot-popover-item:hover{ background:var(--blue-50); color:var(--fg-brand); }
+.pivot-popover-item-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.pivot-popover-item-type{ font-style:italic; color:var(--gray-600); font-size:11px; flex:0 0 auto; }
+
+.pivot-filter-popover{ width:276px; }
+.pivot-filter-actions{ display:flex; gap:10px; padding:2px 2px 8px; }
+.pivot-filter-actions button{
+  border:none; background:none; color:var(--fg-brand); font-size:12px; font-weight:700; cursor:pointer; padding:0;
+  font-family:var(--font-ui);
+}
+.pivot-filter-actions button:hover{ text-decoration:underline; }
+.pivot-filter-values{ max-height:220px; overflow-y:auto; display:flex; flex-direction:column; }
+.pivot-filter-item{ display:flex; align-items:center; gap:8px; padding:6px 4px; font-size:12.5px; color:var(--fg-primary); cursor:pointer; font-family:var(--font-ui); }
+.pivot-filter-item input{ width:14px;height:14px; accent-color:var(--fg-brand); cursor:pointer; flex:0 0 auto; }
+.pivot-filter-item span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pivot-filter-footer{ display:flex; justify-content:flex-end; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid var(--gray-200b); }
+.pivot-btn-cancel, .pivot-btn-ok{
+  height:30px; padding:0 14px; border-radius:var(--radius-s); font-size:12.5px; font-weight:700; cursor:pointer;
+  font-family:var(--font-ui); border:1.5px solid var(--gray-300); background:#fff; color:var(--fg-primary);
+}
+.pivot-btn-cancel:hover{ border-color:var(--gray-500); }
+.pivot-btn-ok{ border-color:var(--blue-500); background:var(--blue-500); color:#fff; }
+.pivot-btn-ok:hover{ background:var(--blue-600); border-color:var(--blue-600); }
+
+/* ---------- Grand Total styling in the results grid ---------- */
+table.dgrid tr.gt-row td{ font-weight:700; background:var(--bg-subtle); border-top:2px solid var(--gray-300); }
+table.dgrid td.gt-cell{ font-weight:700; background:var(--bg-subtle); }
+table.dgrid th.gt-cell{ background:var(--blue-600); }
+
+@media (max-width: 900px){
+  .pivot-page{ flex-direction:column; }
+  .pivot-editor{ flex:0 0 auto; width:100%; max-width:none; max-height:46vh; border-right:none; border-bottom:1px solid var(--gray-200b); }
+  .pivot-editor-toggle{ display:none; }
+}
+
+/* scrollbars */
+::-webkit-scrollbar{ width:9px;height:9px; }
+::-webkit-scrollbar-track{ background:transparent; }
+::-webkit-scrollbar-thumb{ background:var(--gray-400); border-radius:5px; }
+::-webkit-scrollbar-thumb:hover{ background:var(--gray-600); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="navbar">
+    <div class="navbar-left">
+      <div class="logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+      </div>
+      <span class="app-title">Visual Query</span>
+      <div class="navbar-tabs" id="navbarTabs">
+        <button class="nav-tab active" id="navTabVQ">Visual Query</button>
+        <button class="nav-tab" id="navTabDE">Data Explorer</button>
+      </div>
+    </div>
+    <div class="navbar-right">
+      <span class="navbar-user-label" id="navbarUserLabel">system admin</span>
+      <button class="avatar" id="avatarBtn" title="Profile">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="toolbar" id="toolbarMain">
+    <button class="tb-btn" id="btnUndo" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12H9"/></svg>
+      Undo
+    </button>
+    <button class="tb-btn" id="btnRedo" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h5"/></svg>
+      Redo
+    </button>
+    <span class="tb-divider"></span>
+    <button class="tb-btn" id="btnRun">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l14 8-14 8V4z"/></svg>
+      Run
+    </button>
+    <button class="tb-btn" id="btnSave">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+      Save
+    </button>
+    <span class="tb-divider"></span>
+    <button class="tb-btn tb-danger" id="btnClear">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="m19 6-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      Clear All
+    </button>
+    <span class="tb-divider"></span>
+    <button class="tb-btn" id="btnPivot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 9v12"/><rect x="3" y="3" width="6" height="6" rx="1" fill="currentColor" stroke="none"/></svg>
+      Pivot
+    </button>
+  </div>
+
+  <div class="toolbar pivot-toolbar" id="pivotToolbar">
+    <button class="tb-btn" id="btnBackToVisual">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Visual Query
+    </button>
+    <span class="tb-divider"></span>
+    <button class="tb-btn tb-danger" id="btnClearPivot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="m19 6-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      Clear
+    </button>
+    <button class="tb-btn" id="btnRunPivot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l14 8-14 8V4z"/></svg>
+      Run
+    </button>
+  </div>
+
+  <div class="workspace" id="workspace">
+    <aside class="sidebar" id="sidebar"></aside>
+    <button class="sidebar-toggle" id="sidebarToggle" title="Collapse Sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <div class="workspace-main" id="workspaceMain">
+      <div class="canvas-viewport" id="canvasViewport">
+        <main class="canvas-wrap" id="canvasWrap">
+          <div class="canvas" id="canvas">
+            <svg class="conn-layer" id="connLayer"></svg>
+            <div class="nodes-layer" id="nodesLayer"></div>
+            <div class="pill-layer" id="pillLayer"></div>
+          </div>
+        </main>
+
+        <div class="zoom-controls">
+          <button id="zoomIn" title="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button id="zoomOut" title="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+          <button id="zoomFit" title="Fit view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+          <button id="zoomLock" title="Lock nodes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></button>
+        </div>
+
+        <div class="minimap-dock" id="minimapDock">
+          <button class="minimap-toggle" id="minimapToggle" title="Hide Minimap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+          <div class="minimap"><svg id="minimapSvg" width="150" height="96"></svg></div>
+        </div>
+      </div>
+
+      <section class="bottom-panel" id="bottomPanel">
+        <button class="panel-resize-handle" id="panelResizeHandle" title="Drag to resize panel" aria-label="Drag to resize panel">
+          <svg class="prh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg>
+        </button>
+        <div class="panel-tabs" id="panelTabsRow">
+          <button class="panel-tab active" data-tab="data" id="tabBtnData">Data</button>
+          <span class="panel-spacer"></span>
+        </div>
+        <div class="panel-body">
+          <div class="tab-content" id="tabData">
+            <div class="data-toolbar" id="dataToolbarRow">
+              <button class="export-btn" id="btnExportCsv" title="Export data as CSV file">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                <span class="btn-label">Export CSV</span>
+              </button>
+              <div class="rpp-inline">Rows :
+                <button type="button" class="rpp-trigger" id="rppTrigger">
+                  <span class="rpp-trigger-label">100</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+              </div>
+              <button class="fs-btn" id="fsBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                <span class="btn-label">Full Screen</span>
+              </button>
+              <!-- Dedicated Minimize Screen Button -->
+              <button class="min-btn" id="minBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v4a2 2 0 0 1-2 2H3M21 9h-4a2 2 0 0 1-2-2V3M3 15h4a2 2 0 0 1 2 2v4M15 21v-4a2 2 0 0 1 2-2h4"/></svg>
+                <span class="btn-label">Minimize Screen</span>
+              </button>
+            </div>
+            <div class="data-scroll" id="dataScroll"></div>
+            <div class="data-footer" id="dataFooter"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="pivot-page" id="pivotPage">
+        <aside class="pivot-editor" id="pivotEditor">
+          <div class="pivot-editor-header">
+            <div class="pivot-editor-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 9v12"/></svg>
+              Pivot table editor
+            </div>
+          </div>
+          <div class="pivot-editor-body" id="pivotEditorBody">
+            <div class="pivot-section" data-zone="rows">
+              <div class="pivot-section-head">
+                <span>Rows</span>
+                <button type="button" class="pivot-add-btn" data-add-zone="rows">+ Add</button>
+              </div>
+              <div class="pivot-field-boxes" id="pivotRowsBoxes"></div>
+            </div>
+            <div class="pivot-section" data-zone="cols">
+              <div class="pivot-section-head">
+                <span>Columns</span>
+                <button type="button" class="pivot-add-btn" data-add-zone="cols">+ Add</button>
+              </div>
+              <div class="pivot-field-boxes" id="pivotColsBoxes"></div>
+            </div>
+            <div class="pivot-section" data-zone="values">
+              <div class="pivot-section-head">
+                <span>Values</span>
+                <button type="button" class="pivot-add-btn" data-add-zone="values">+ Add</button>
+              </div>
+              <div class="pivot-field-boxes" id="pivotValuesBoxes"></div>
+            </div>
+          </div>
+        </aside>
+        <button class="pivot-editor-toggle" id="pivotEditorToggle" title="Collapse Editor">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+
+        <div class="pivot-grid-area" id="pivotGridArea">
+          <div class="data-toolbar" id="pivotDataToolbarRow"></div>
+          <div class="data-scroll" id="pivotDataScroll"></div>
+          <div class="data-footer" id="pivotDataFooter"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toastHost"></div>
+<div id="modalHost"></div>
+<div id="filterPopoverHost"></div>
+
+<script>
+/* ============================================================
+   SCHEMA — Chinook-style data mart used by the Visual Query demo
+   ============================================================ */
+const SCHEMA = {
+  Track: { pk:'TrackId', cols:[
+    ['TrackId','int64'],['Name','string'],['AlbumId','int64'],['MediaTypeId','int64'],
+    ['GenreId','int64'],['Composer','string'],['Milliseconds','int64'],['Bytes','int64'],['UnitPrice','float64']
+  ]},
+  Album: { pk:'AlbumId', cols:[ ['AlbumId','int64'],['Title','string'],['ArtistId','int64'] ]},
+  Artist: { pk:'ArtistId', cols:[ ['ArtistId','int64'],['Name','string'] ]},
+  Customer: { pk:'CustomerId', cols:[
+    ['CustomerId','int64'],['FirstName','string'],['LastName','string'],['Company','string'],
+    ['Address','string'],['City','string'],['State','string'],['Country','string'],
+    ['PostalCode','string'],['Phone','string'],['Fax','string'],['Email','string'],['SupportRepId','int64']
+  ]},
+  Employee: { pk:'EmployeeId', cols:[
+    ['EmployeeId','int64'],['LastName','string'],['FirstName','string'],['Title','string'],
+    ['ReportsTo','int64'],['BirthDate','timestamp'],['HireDate','timestamp'],['Address','string'],
+    ['City','string'],['State','string'],['Country','string'],['PostalCode','string'],
+    ['Phone','string'],['Fax','string'],['Email','string']
+  ]},
+  Genre: { pk:'GenreId', cols:[ ['GenreId','int64'],['Name','string'] ]},
+  Invoice: { pk:'InvoiceId', cols:[
+    ['InvoiceId','int64'],['CustomerId','int64'],['InvoiceDate','timestamp'],['BillingAddress','string'],
+    ['BillingCity','string'],['BillingState','string'],['BillingCountry','string'],
+    ['BillingPostalCode','string'],['Total','float64']
+  ]},
+  InvoiceLine: { pk:'InvoiceLineId', cols:[
+    ['InvoiceLineId','int64'],['InvoiceId','int64'],['TrackId','int64'],['UnitPrice','float64'],['Quantity','int64']
+  ]},
+  MediaType: { pk:'MediaTypeId', cols:[ ['MediaTypeId','int64'],['Name','string'] ]},
+  Playlist: { pk:'PlaylistId', cols:[ ['PlaylistId','int64'],['Name','string'] ]},
+  PlaylistTrack: { pk:'PlaylistId', cols:[ ['PlaylistId','int64'],['TrackId','int64'] ]}
+};
+const MART_TABLES = ['Album','Artist','Customer','Employee','Genre','Invoice','InvoiceLine','MediaType','Playlist','PlaylistTrack','Track'];
+
+const ICONS = {
+  file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>',
+  folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>',
+  chev: '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  table: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 15h18M9 4v16"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="m19 6-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+  minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>',
+  expand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>',
+  collapse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v4a2 2 0 0 1-2 2H3M21 9h-4a2 2 0 0 1-2-2V3M3 15h4a2 2 0 0 1 2 2v4M15 21v-4a2 2 0 0 1 2-2h4"/></svg>',
+  funnel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>'
+};
+
+/* ============================================================
+   COLUMN FILTERS — operators + helpers
+   ============================================================ */
+const FILTER_OPERATORS = ['Equals','Not equals','Greater than','Less than','Greater than or equals','Less than or equals','Is null','Is not null','Contains','Regex','Distinct'];
+const FILTER_NO_VALUE_OPS = ['Is null','Is not null','Distinct'];
+
+function filterConditionIsMeaningful(c){
+  return FILTER_NO_VALUE_OPS.includes(c.operator) || (c.value!==undefined && c.value!==null && String(c.value).trim()!=='');
+}
+function isFilterActive(f){
+  if(!f) return false;
+  const condActive = Array.isArray(f.conditions) && f.conditions.some(filterConditionIsMeaningful);
+  const orderActive = f.order==='asc' || f.order==='desc';
+  return condActive || orderActive;
+}
+function describeFilter(f){
+  if(!f) return '';
+  const parts = [];
+  if(Array.isArray(f.conditions)){
+    f.conditions.forEach((c,i)=>{
+      if(!filterConditionIsMeaningful(c)) return;
+      const conn = (i>0 && parts.length) ? `${c.connector==='OR'?'OR':'AND'} ` : '';
+      const valPart = FILTER_NO_VALUE_OPS.includes(c.operator) ? '' : ` "${c.value}"`;
+      parts.push(`${conn}${c.operator}${valPart}`);
+    });
+  }
+  let txt = parts.length ? 'Filter: '+parts.join(' ') : '';
+  if(f.order==='asc') txt += (txt?'  •  ':'')+'Sort A→Z';
+  if(f.order==='desc') txt += (txt?'  •  ':'')+'Sort Z→A';
+  return txt || 'Filtered';
+}
+
+function escapeHtml(str){ return String(str==null?'':str).replace(/[&<>]/g, (m)=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+function escapeAttr(str){ return escapeHtml(str).replace(/"/g,'&quot;'); }
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let nodes = [];
+let conns = [];
+let nodeSeq = 0, connSeq = 0, orderSeq = 0;
+let zoom = 1, locked = false;
+let activeTab = 'data';
+let history = [], future = [];
+let curPage = 1;
+let ROWS_PER_PAGE = 100;
+let hasRunQuery = false; // becomes true after the first successful "Run"
+const TOTAL_ROWS = 1000; // Mock dataset size, capped at 1000 rows
+
+// Snapshot of nodes/conns captured at the moment "Run" was last clicked. The Data
+// tab is rendered from this frozen copy, not from the live `nodes`/`conns` above —
+// so editing the query (columns, filters, joins, tables) never changes what's shown
+// until the user clicks Run again.
+let committedNodes = [];
+let committedConns = [];
+function cloneNodeForCommit(n){
+  return { id:n.id, table:n.table, order:n.order, selected:new Set(n.selected), filters:JSON.parse(JSON.stringify(n.filters||{})) };
+}
+function commitRunSnapshot(){
+  committedNodes = nodes.map(cloneNodeForCommit);
+  committedConns = conns.map(c=>({...c}));
+}
+
+let savedViews = [];
+let viewSeq = 0;
+
+/* ============================================================
+   PIVOT MODE — state
+   ============================================================ */
+let appMode = 'visual';           // 'visual' | 'pivot'
+const AGG_LABELS = { count:'COUNT', sum:'SUM', avg:'AVERAGE', min:'MIN', max:'MAX' };
+let pivotFields = [];              // [{table,col,type,label}] — every column of every table currently on the canvas
+let pivotRows = [];                // [{_id,table,col,type,label,order,sortBy,showTotals}]
+let pivotCols = [];                // [{_id,table,col,type,label,order,sortBy,showTotals}]
+let pivotValues = [];              // [{_id,table,col,type,label,agg,showAs}]
+let pivotFilters = [];             // [{_id,table,col,type,label,allValues,selected:Set}]
+let pivotFieldSeq = 0;
+let pivotHasRun = false;
+let pivotResult = null;            // computed by computePivotResult()
+let pivotRPP = 100;
+let pivotCurPage = 1;
+const PIVOT_MAX_COLS = 60;         // cap on generated pivot columns, to keep the table sane
+let pivotOpenPopoverEl = null;     // currently-open floating popover (field picker / filter values)
+
+function snapshot(){
+  return JSON.stringify({
+    nodes: nodes.map(n=>({id:n.id,table:n.table,x:n.x,y:n.y,order:n.order,selected:[...n.selected],filters:n.filters||{}})),
+    conns: conns.map(c=>({id:c.id,order:c.order,fromNode:c.fromNode,fromCol:c.fromCol,toNode:c.toNode,toCol:c.toCol,joinType:c.joinType})),
+    nodeSeq, connSeq, orderSeq
+  });
+}
+function restore(snap){
+  const d = JSON.parse(snap);
+  nodes = d.nodes.map(n=>({...n, selected:new Set(n.selected), filters:n.filters||{}}));
+  conns = d.conns.map(c=>({...c}));
+  nodeSeq = d.nodeSeq; connSeq = d.connSeq; orderSeq = d.orderSeq;
+  render();
+}
+function pushHistory(){
+  history.push(snapshot());
+  if(history.length>50) history.shift();
+  future = [];
+  updateUndoRedoBtns();
+}
+function updateUndoRedoBtns(){
+  document.getElementById('btnUndo').disabled = history.length===0;
+  document.getElementById('btnRedo').disabled = future.length===0;
+}
+
+/* ============================================================
+   INITIAL STATE — workspace starts empty (no tables, no joins)
+   ============================================================ */
+function seedInitialState(){
+  nodes = []; conns = [];
+  history = []; future = [];
+  updateUndoRedoBtns();
+}
+
+/* ============================================================
+   NODE / CONNECTION helpers
+   ============================================================ */
+function addNode(table, x, y, record=true){
+  const n = { id:'n'+(++nodeSeq), table, x, y, order:++orderSeq, selected:new Set(SCHEMA[table].cols.map(c=>c[0])), filters:{} };
+  nodes.push(n);
+  if(record) pushHistory();
+  return n;
+}
+function findNode(table){ return nodes.find(n=>n.table===table); }
+
+function addConn(fromNode, fromCol, toNode, toCol, joinType='inner', record=true){
+  const c = { id:'c'+(++connSeq), order:++orderSeq, fromNode:fromNode.id, fromCol, toNode:toNode.id, toCol, joinType };
+  conns.push(c);
+  lockCol(fromNode, fromCol);
+  lockCol(toNode, toCol);
+  if(record) pushHistory();
+  return c;
+}
+function lockCol(node, col){ node.selected.add(col); }
+function lockedCols(nodeId){
+  const s = new Set();
+  conns.forEach(c=>{
+    if(c.fromNode===nodeId) s.add(c.fromCol);
+    if(c.toNode===nodeId) s.add(c.toCol);
+  });
+  return s;
+}
+function removeNode(nodeId, record=true){
+  nodes = nodes.filter(n=>n.id!==nodeId);
+  conns = conns.filter(c=>c.fromNode!==nodeId && c.toNode!==nodeId);
+  if(record) pushHistory();
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+function buildSidebar(){
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = `
+    <div class="tree-item folder" id="rootAll">${ICONS.chev}${ICONS.folder} All</div>
+    <div class="tree-children" id="rootChildren">
+      <div class="tree-item folder" id="martToggle" style="padding-left:24px">${ICONS.chev}${ICONS.folder} data-mart</div>
+      <div class="tree-children" id="martList"></div>
+      <div class="tree-item folder" id="viewToggle" style="padding-left:24px">${ICONS.chev}${ICONS.folder} view</div>
+      <div class="tree-children collapsed" id="viewList"></div>
+    </div>`;
+  const martList = document.getElementById('martList');
+  MART_TABLES.forEach(t=>{
+    const row = document.createElement('div');
+    row.className = 'tree-item table-item';
+    row.dataset.table = t;
+    row.draggable = true;
+    row.innerHTML = `${ICONS.file}<span>${t}</span><span class="table-dot"></span>`;
+    row.addEventListener('click', ()=> onSidebarTableClick(t));
+    row.addEventListener('dragstart', (e)=>{
+      e.dataTransfer.setData('text/plain', t);
+      e.dataTransfer.effectAllowed = 'copy';
+      row.classList.add('dragging-row');
+    });
+    row.addEventListener('dragend', ()=> row.classList.remove('dragging-row'));
+    martList.appendChild(row);
+  });
+
+  document.getElementById('rootAll').addEventListener('click', ()=>{
+    document.getElementById('rootAll').classList.toggle('collapsed');
+    document.getElementById('rootChildren').classList.toggle('collapsed');
+  });
+  document.getElementById('martToggle').addEventListener('click', ()=>{
+    document.getElementById('martToggle').classList.toggle('collapsed');
+    document.getElementById('martList').classList.toggle('collapsed');
+  });
+  document.getElementById('viewToggle').addEventListener('click', ()=>{
+    document.getElementById('viewToggle').classList.toggle('collapsed');
+    document.getElementById('viewList').classList.toggle('collapsed');
+  });
+  renderViewList();
+}
+
+function addSavedView(title){
+  const id = 'view'+(++viewSeq);
+  savedViews.push({ id, title, mode:'visual', restApi:false, ckan:false, expanded:true });
+  renderViewList();
+  document.getElementById('viewToggle').classList.remove('collapsed');
+  document.getElementById('viewList').classList.remove('collapsed');
+}
+
+function renderViewList(){
+  const list = document.getElementById('viewList');
+  if(!list) return;
+
+  list.innerHTML = savedViews.map(v=>`
+    <div class="tree-item folder view-entry-folder ${v.expanded?'':'collapsed'}" style="padding-left:36px" data-view-folder="${v.id}">
+      ${ICONS.chev}${ICONS.folder}<span>${escapeHtml(v.title)}</span>
+    </div>
+    <div class="tree-children view-entry-children ${v.expanded?'':'collapsed'}" data-view-children="${v.id}">
+      <div class="tree-item table-item view-mode-item ${v.mode==='visual'?'active':''}" style="padding-left:56px" data-view-mode="${v.id}:visual">${ICONS.file}<span>Visual Query</span></div>
+      <div class="tree-item table-item view-mode-item ${v.mode==='pivot'?'active':''}" style="padding-left:56px" data-view-mode="${v.id}:pivot">${ICONS.file}<span>Pivot</span></div>
+      <div class="view-divider"></div>
+      <div class="view-toggle-row">
+        <span>REST API</span>
+        <button class="toggle-switch ${v.restApi?'on':''}" title="Toggle REST API publishing" data-view-toggle-rest="${v.id}"><span class="toggle-knob"></span></button>
+      </div>
+      <div class="view-toggle-row">
+        <span>CKAN</span>
+        <button class="toggle-switch ${v.ckan?'on':''}" title="Toggle CKAN publishing" data-view-toggle-ckan="${v.id}"><span class="toggle-knob"></span></button>
+      </div>
+      <button class="view-delete-btn" data-view-delete="${v.id}">${ICONS.trash}<span>Delete</span></button>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('[data-view-folder]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const v = savedViews.find(x=>x.id===el.dataset.viewFolder);
+      v.expanded = !v.expanded;
+      renderViewList();
+    });
+  });
+  list.querySelectorAll('[data-view-mode]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const [id, mode] = el.dataset.viewMode.split(':');
+      const v = savedViews.find(x=>x.id===id);
+      v.mode = mode;
+      renderViewList();
+      showToast('info', `Opened view "${v.title}" in ${mode==='visual'?'Visual Query':'Pivot'} mode`);
+    });
+  });
+  list.querySelectorAll('[data-view-toggle-rest]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const v = savedViews.find(x=>x.id===el.dataset.viewToggleRest);
+      v.restApi = !v.restApi;
+      renderViewList();
+      showToast(v.restApi?'success':'info', `REST API ${v.restApi?'enabled':'disabled'} for "${v.title}"`);
+    });
+  });
+  list.querySelectorAll('[data-view-toggle-ckan]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const v = savedViews.find(x=>x.id===el.dataset.viewToggleCkan);
+      v.ckan = !v.ckan;
+      renderViewList();
+      showToast(v.ckan?'success':'info', `${v.ckan?'Published to':'Unpublished from'} CKAN for "${v.title}"`);
+    });
+  });
+  list.querySelectorAll('[data-view-delete]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const id = el.dataset.viewDelete;
+      const v = savedViews.find(x=>x.id===id);
+      openDeleteViewModal(id, v.title);
+    });
+  });
+}
+function onSidebarTableClick(table){
+  const existing = findNode(table);
+  if(existing){
+    flashNode(existing.id);
+    return;
+  }
+  const rightMost = nodes.reduce((m,n)=> Math.max(m, n.x), -260);
+  const n = addNode(table, rightMost + 260, 120 + (nodes.length%3)*40, false);
+  pushHistory();
+  render();
+  showToast('info', `Added table ${table} to the workspace`);
+}
+function flashNode(nodeId){
+  render();
+  const el = document.querySelector(`.tnode[data-id="${nodeId}"]`);
+  if(el){
+    el.style.transition='box-shadow .15s';
+    el.style.boxShadow = '0 0 0 3px var(--blue-300)';
+    el.scrollIntoView({block:'center', inline:'center', behavior:'smooth'});
+    setTimeout(()=>{ el.style.boxShadow=''; }, 700);
+  }
+}
+
+/* ============================================================
+   SIDEBAR -> CANVAS DRAG & DROP
+   Lets a table row in the sidebar be dragged onto the canvas
+   area to add it as a node at the dropped position.
+   ============================================================ */
+function initCanvasDropZone(){
+  const wrap = document.getElementById('canvasWrap');
+  const canvasEl = document.getElementById('canvas');
+
+  wrap.addEventListener('dragover', (e)=>{
+    if(![...e.dataTransfer.types].includes('text/plain')) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    wrap.classList.add('drop-target');
+  });
+  wrap.addEventListener('dragleave', (e)=>{
+    if(!wrap.contains(e.relatedTarget)) wrap.classList.remove('drop-target');
+  });
+  wrap.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    wrap.classList.remove('drop-target');
+    const table = e.dataTransfer.getData('text/plain');
+    if(!table || !SCHEMA[table]) return;
+
+    const existing = findNode(table);
+    if(existing){ flashNode(existing.id); return; }
+
+    const rect = canvasEl.getBoundingClientRect();
+    const x = Math.max(0, (e.clientX - rect.left)/zoom - NODE_W/2);
+    const y = Math.max(0, (e.clientY - rect.top)/zoom - HEAD_H/2);
+    addNode(table, x, y, false);
+    pushHistory();
+    render();
+    showToast('info', `Added table ${table} to the workspace`);
+  });
+}
+
+/* ============================================================
+   CANVAS RENDER
+   ============================================================ */
+const NODE_W = 224, HEAD_H = 32, ROW_H = 28;
+
+function render(){
+  renderCanvasContent();
+  renderMinimap();
+  renderSidebarDots();
+  updateUndoRedoBtns();
+  updateSaveBtnState();
+  if(activeTab==='data') renderData(curPage); // re-render from the committed (last-Run) snapshot only
+}
+
+function updateSaveBtnState(){
+  const btn = document.getElementById('btnSave');
+  if(!btn) return;
+  const active = nodes.length>0;
+  btn.disabled = !active;
+}
+
+function renderSidebarDots(){
+  document.querySelectorAll('.table-item').forEach(el=>{
+    const has = !!findNode(el.dataset.table);
+    el.classList.toggle('active', has);
+  });
+}
+
+function rowY(node, colIdx){ return node.y + HEAD_H + colIdx*ROW_H + ROW_H/2; }
+
+function renderCanvasContent(){
+  const layer = document.getElementById('nodesLayer');
+  layer.innerHTML='';
+  nodes.forEach(n=>{
+    const def = SCHEMA[n.table];
+    const locked = lockedCols(n.id);
+    const el = document.createElement('div');
+    el.className = 'tnode';
+    el.dataset.id = n.id;
+    el.style.left = n.x+'px';
+    el.style.top = n.y+'px';
+    el.style.width = NODE_W+'px';
+
+    const head = document.createElement('div');
+    head.className = 'tnode-head';
+
+    const allColKeys = def.cols.map(c=>c[0]);
+    const selectedCount = allColKeys.filter(c=>n.selected.has(c)).length;
+    const allSelected = allColKeys.length>0 && selectedCount===allColKeys.length;
+    const someSelected = selectedCount>0 && !allSelected;
+
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'tnode-title-wrap';
+
+    const headChk = document.createElement('div');
+    headChk.className = 'chk chk-head' + (allSelected?' checked':'') + (someSelected?' indeterminate':'');
+    headChk.innerHTML = someSelected ? ICONS.minus : ICONS.check;
+    headChk.title = allSelected ? 'Deselect all columns' : 'Select all columns';
+    headChk.addEventListener('mousedown', (e)=> e.stopPropagation());
+    headChk.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if(allSelected){
+        conns = conns.filter(c=> c.fromNode!==n.id && c.toNode!==n.id);
+        n.selected = new Set();
+      } else {
+        n.selected = new Set(allColKeys);
+      }
+      pushHistory(); render();
+    });
+    titleWrap.appendChild(headChk);
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'tnode-title';
+    nameEl.textContent = n.table;
+    titleWrap.appendChild(nameEl);
+
+    head.appendChild(titleWrap);
+    const closeBtn = document.createElement('button');
+    closeBtn.className='tnode-close';
+    closeBtn.innerHTML = ICONS.close;
+    closeBtn.title = 'Remove table from workspace';
+    closeBtn.addEventListener('mousedown', (e)=> e.stopPropagation());
+    closeBtn.addEventListener('click', (e)=>{ e.stopPropagation(); openRemoveNodeModal(n.id, n.table); });
+    head.appendChild(closeBtn);
+    el.appendChild(head);
+
+    const body = document.createElement('div');
+    body.className = 'tnode-body';
+    def.cols.forEach(([col,type], idx)=>{
+      const isLocked = locked.has(col);
+      const isChecked = n.selected.has(col);
+      const colFilter = n.filters ? n.filters[col] : null;
+      const filterActive = isFilterActive(colFilter);
+      const row = document.createElement('div');
+      row.className = 'trow' + (isLocked?' locked':'') + (filterActive?' has-filter':'');
+      row.dataset.col = col;
+      row.title = filterActive ? describeFilter(colFilter) : '';
+      row.addEventListener('click', (e)=>{
+        if(e.target.closest('.chk') || e.target.closest('.dot-l') || e.target.closest('.dot-r')) return;
+        e.stopPropagation();
+        openColumnFilterPopover(n, col, row);
+      });
+
+      const chk = document.createElement('div');
+      chk.className = 'chk' + (isChecked?' checked':'') + (isLocked?' locked':'');
+      chk.innerHTML = ICONS.check;
+      chk.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        if(n.selected.has(col)){
+          n.selected.delete(col);
+          if(isLocked) conns = conns.filter(c=> !((c.fromNode===n.id && c.fromCol===col) || (c.toNode===n.id && c.toCol===col)));
+        } else {
+          n.selected.add(col);
+        }
+        pushHistory(); render();
+      });
+      row.appendChild(chk);
+
+      const nameWrap = document.createElement('span');
+      nameWrap.className = 'col-name-wrap';
+
+      const nameEl = document.createElement('span');
+      nameEl.className='col-name'; nameEl.textContent = col;
+      nameWrap.appendChild(nameEl);
+
+      if(filterActive){
+        const badge = document.createElement('span');
+        badge.className = 'col-filter-badge';
+        badge.innerHTML = ICONS.funnel;
+        nameWrap.appendChild(badge);
+      }
+
+      row.appendChild(nameWrap);
+
+      const typeEl = document.createElement('span');
+      typeEl.className='col-type'; typeEl.textContent = type;
+      row.appendChild(typeEl);
+
+      const dotL = document.createElement('div'); dotL.className='dot-l';
+      const dotR = document.createElement('div'); dotR.className='dot-r';
+      row.appendChild(dotL); row.appendChild(dotR);
+
+      [dotL,dotR].forEach(d=>{
+        d.addEventListener('mousedown', (e)=>{ e.stopPropagation(); e.preventDefault(); startConnectionDrag(n, col, e); });
+      });
+
+      body.appendChild(row);
+    });
+    el.appendChild(body);
+
+    head.addEventListener('mousedown', (e)=> startNodeDrag(n, el, e));
+    layer.appendChild(el);
+  });
+  drawConnections();
+}
+
+function startNodeDrag(node, el, evt){
+  if(locked) return;
+  evt.preventDefault();
+  const startX = evt.clientX, startY = evt.clientY;
+  const ox = node.x, oy = node.y;
+  el.classList.add('dragging');
+  function onMove(e){
+    node.x = ox + (e.clientX-startX)/zoom;
+    node.y = oy + (e.clientY-startY)/zoom;
+    el.style.left = node.x+'px'; el.style.top = node.y+'px';
+    drawConnections(); renderMinimap();
+  }
+  function onUp(){
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    el.classList.remove('dragging');
+    pushHistory(); render();
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+function startConnectionDrag(node, col, evt){
+  const canvasEl = document.getElementById('canvas');
+  const svg = document.getElementById('connLayer');
+  const tempPath = document.createElementNS('http://www.w3.org/2000/svg','path');
+  tempPath.setAttribute('stroke', 'var(--blue-400)');
+  tempPath.setAttribute('stroke-width','2');
+  tempPath.setAttribute('fill','none');
+  tempPath.setAttribute('stroke-dasharray','5,4');
+  svg.appendChild(tempPath);
+
+  const rect = canvasEl.getBoundingClientRect();
+  const idx = SCHEMA[node.table].cols.findIndex(c=>c[0]===col);
+  const sx = node.x + NODE_W, sy = rowY(node, idx);
+
+  function onMove(e){
+    const mx = (e.clientX-rect.left)/zoom, my = (e.clientY-rect.top)/zoom;
+    tempPath.setAttribute('d', bezier(sx,sy,mx,my));
+  }
+  function onUp(e){
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    svg.removeChild(tempPath);
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    const rowEl = target && target.closest ? target.closest('.trow') : null;
+    const nodeEl = rowEl ? rowEl.closest('.tnode') : null;
+    if(rowEl && nodeEl){
+      const targetNode = nodes.find(n=>n.id===nodeEl.dataset.id);
+      const targetCol = rowEl.dataset.col;
+      if(targetNode && !(targetNode.id===node.id && targetCol===col)){
+        const already = conns.some(c=>
+          (c.fromNode===node.id&&c.fromCol===col&&c.toNode===targetNode.id&&c.toCol===targetCol) ||
+          (c.toNode===node.id&&c.toCol===col&&c.fromNode===targetNode.id&&c.fromCol===targetCol));
+        if(!already){
+          addConn(node, col, targetNode, targetCol, 'inner');
+          render();
+          showToast('info', `Connected ${node.table}.${col} to ${targetNode.table}.${targetCol} (inner join)`);
+        }
+      }
+    }
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+function bezier(x1,y1,x2,y2){
+  const dx = Math.max(60, Math.abs(x2-x1)*0.5);
+  return `M ${x1} ${y1} C ${x1+dx} ${y1}, ${x2-dx} ${y2}, ${x2} ${y2}`;
+}
+
+let openJoinMenu = null;
+function drawConnections(){
+  const svg = document.getElementById('connLayer');
+  const pillLayer = document.getElementById('pillLayer');
+  svg.innerHTML = '';
+  pillLayer.innerHTML = '';
+  conns.forEach(c=>{
+    const fn = nodes.find(n=>n.id===c.fromNode), tn = nodes.find(n=>n.id===c.toNode);
+    if(!fn||!tn) return;
+    const fi = SCHEMA[fn.table].cols.findIndex(x=>x[0]===c.fromCol);
+    const ti = SCHEMA[tn.table].cols.findIndex(x=>x[0]===c.toCol);
+    let x1,y1,x2,y2;
+    if(fn.x <= tn.x){ x1=fn.x+NODE_W; y1=rowY(fn,fi); x2=tn.x; y2=rowY(tn,ti); }
+    else { x1=fn.x; y1=rowY(fn,fi); x2=tn.x+NODE_W; y2=rowY(tn,ti); }
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', bezier(x1,y1,x2,y2));
+    path.setAttribute('stroke', '#8E908D');
+    path.setAttribute('stroke-width','1.6');
+    path.setAttribute('fill','none');
+    svg.appendChild(path);
+
+    const mx = (x1+x2)/2, my = (y1+y2)/2;
+    const pill = document.createElement('div');
+    pill.className='join-pill';
+    pill.style.left = mx+'px';
+    pill.style.top = my+'px';
+    pill.innerHTML = `<span>${c.joinType}</span>${ICONS.chev.replace('class="chev"','')}`;
+    pill.addEventListener('click', (e)=>{ e.stopPropagation(); toggleJoinMenu(c, pill); });
+    pillLayer.appendChild(pill);
+  });
+}
+function toggleJoinMenu(conn, anchorEl){
+  closeJoinMenu();
+  const menu = document.createElement('div');
+  menu.className='join-menu';
+  ['left','right','inner','outer'].forEach(jt=>{
+    const b = document.createElement('button');
+    b.textContent = jt;
+    if(jt===conn.joinType) b.classList.add('sel');
+    b.addEventListener('click', ()=>{
+      conn.joinType = jt;
+      pushHistory();
+      closeJoinMenu();
+      render();
+    });
+    menu.appendChild(b);
+  });
+  document.body.appendChild(menu);
+  const r = anchorEl.getBoundingClientRect();
+  menu.style.left = r.left+'px';
+  menu.style.top = (r.bottom+4)+'px';
+  openJoinMenu = menu;
+  setTimeout(()=> document.addEventListener('click', closeJoinMenuOnce), 0);
+}
+function closeJoinMenuOnce(e){ closeJoinMenu(); }
+function closeJoinMenu(){
+  if(openJoinMenu){ openJoinMenu.remove(); openJoinMenu=null; }
+  document.removeEventListener('click', closeJoinMenuOnce);
+}
+
+/* ============================================================
+   USER MENU (avatar dropdown)
+   ============================================================ */
+let openUserMenu = null;
+function toggleUserMenu(anchorEl){
+  if(openUserMenu){ closeUserMenu(); return; }
+  const menu = document.createElement('div');
+  menu.className = 'user-menu';
+  menu.innerHTML = `
+    <div class="user-menu-header">
+      <div class="user-menu-name">system admin</div>
+      <div class="user-menu-role">Administrator</div>
+    </div>
+    <div class="user-menu-divider"></div>
+    <button class="user-menu-item" id="userMenuLogout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Log out
+    </button>`;
+  document.body.appendChild(menu);
+  const r = anchorEl.getBoundingClientRect();
+  menu.style.top = (r.bottom+6)+'px';
+  menu.style.right = (window.innerWidth-r.right)+'px';
+  openUserMenu = menu;
+  document.getElementById('userMenuLogout').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    closeUserMenu();
+    showToast('info','Logged out successfully');
+  });
+  setTimeout(()=> document.addEventListener('click', closeUserMenuOnce), 0);
+}
+function closeUserMenuOnce(e){ closeUserMenu(); }
+function closeUserMenu(){
+  if(openUserMenu){ openUserMenu.remove(); openUserMenu=null; }
+  document.removeEventListener('click', closeUserMenuOnce);
+}
+document.getElementById('avatarBtn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  toggleUserMenu(e.currentTarget);
+});
+
+/* ============================================================
+   COLUMN FILTER POPOVER
+   ============================================================ */
+let filterEditor = null;       // { nodeId, col, conditions:[...], order:null|'asc'|'desc' }
+let filterPopoverAnchor = null; // { left, top } — screen coords, cached across re-renders
+
+function openColumnFilterPopover(node, col, rowEl){
+  closeColumnFilterPopover();
+  closeJoinMenu();
+  const existing = node.filters ? node.filters[col] : null;
+  filterEditor = {
+    nodeId: node.id,
+    col,
+    conditions: (existing && existing.conditions && existing.conditions.length)
+      ? existing.conditions.map(c=>({ connector: c.connector||null, operator: c.operator||'Equals', value: c.value||'' }))
+      : [{ connector:null, operator:'Equals', value:'' }],
+    order: existing ? (existing.order||null) : null
+  };
+  const rect = rowEl.getBoundingClientRect();
+  filterPopoverAnchor = { left: rect.right + 12, top: Math.max(12, rect.top - 8) };
+  renderFilterPopover();
+  setTimeout(()=> document.addEventListener('mousedown', onDocMouseDownCloseFilter), 0);
+}
+
+function closeColumnFilterPopover(){
+  const host = document.getElementById('filterPopoverHost');
+  if(host) host.innerHTML = '';
+  filterEditor = null;
+  document.removeEventListener('mousedown', onDocMouseDownCloseFilter);
+}
+
+function onDocMouseDownCloseFilter(e){
+  const pop = document.querySelector('.filt-popover');
+  if(pop && !pop.contains(e.target)) closeColumnFilterPopover();
+}
+
+function renderFilterPopover(){
+  const host = document.getElementById('filterPopoverHost');
+  if(!host || !filterEditor) return;
+  const conds = filterEditor.conditions;
+
+  const rowsHtml = conds.map((c,i)=>{
+    const isLast = i===conds.length-1;
+    const isFirst = i===0;
+    const noVal = FILTER_NO_VALUE_OPS.includes(c.operator);
+    let h = '';
+    if(!isFirst){
+      h += `<div class="filt-conn-toggle">
+        <button type="button" class="filt-conn-btn ${c.connector!=='OR'?'active':''}" data-conn-idx="${i}" data-conn-val="AND">AND</button>
+        <button type="button" class="filt-conn-btn ${c.connector==='OR'?'active':''}" data-conn-idx="${i}" data-conn-val="OR">OR</button>
+      </div>`;
+    }
+    h += `<div class="filt-row">
+      <select class="filt-op-select" data-op-idx="${i}">
+        ${FILTER_OPERATORS.map(o=>`<option value="${o}" ${o===c.operator?'selected':''}>${o}</option>`).join('')}
+      </select>
+      <input type="text" class="filt-val-input" data-val-idx="${i}" placeholder="Value" value="${escapeAttr(c.value||'')}" ${noVal?'disabled':''}>
+      <div class="filt-row-actions">
+        ${isLast?`<button type="button" class="filt-icon-btn filt-add" data-add-cond title="Add condition">${ICONS.plus}</button>`:''}
+        ${!isFirst?`<button type="button" class="filt-icon-btn filt-del" data-del-cond="${i}" title="Remove condition">${ICONS.trash}</button>`:''}
+      </div>
+    </div>`;
+    return h;
+  }).join('');
+
+  host.innerHTML = `
+    <div class="filt-popover" style="left:${filterPopoverAnchor.left}px; top:${filterPopoverAnchor.top}px;">
+      <div class="filt-header">${escapeHtml(filterEditor.col)}</div>
+      <div class="filt-section-label">Filter</div>
+      ${rowsHtml}
+      <div class="filt-section-label" style="margin-top:14px;">Order</div>
+      <div class="filt-order-row">
+        <button type="button" class="filt-order-btn ${filterEditor.order==='asc'?'active':''}" data-order="asc" title="Sort ascending">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+          <span>A–Z</span>
+        </button>
+        <button type="button" class="filt-order-btn ${filterEditor.order==='desc'?'active':''}" data-order="desc" title="Sort descending">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+          <span>Z–A</span>
+        </button>
+      </div>
+      <div class="filt-footer">
+        <button type="button" class="filt-btn filt-btn-apply" id="filtApplyBtn">${ICONS.check} Apply</button>
+        <button type="button" class="filt-btn filt-btn-remove" id="filtRemoveBtn">${ICONS.trash} Remove</button>
+        <button type="button" class="filt-btn filt-btn-cancel" id="filtCancelBtn">${ICONS.close} Cancel</button>
+      </div>
+    </div>`;
+  clampFilterPopoverPosition();
+  wireFilterPopover();
+}
+
+function clampFilterPopoverPosition(){
+  const pop = document.querySelector('.filt-popover');
+  if(!pop) return;
+  const r = pop.getBoundingClientRect();
+  const margin = 10;
+  let left = filterPopoverAnchor.left, top = filterPopoverAnchor.top;
+  if(left + r.width > window.innerWidth - margin) left = Math.max(margin, window.innerWidth - r.width - margin);
+  if(top + r.height > window.innerHeight - margin) top = Math.max(margin, window.innerHeight - r.height - margin);
+  pop.style.left = left+'px';
+  pop.style.top = top+'px';
+}
+
+function wireFilterPopover(){
+  const pop = document.querySelector('.filt-popover');
+  if(!pop) return;
+  pop.addEventListener('mousedown', e=> e.stopPropagation());
+
+  pop.querySelectorAll('[data-op-idx]').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const idx = +sel.dataset.opIdx;
+      filterEditor.conditions[idx].operator = sel.value;
+      const noVal = FILTER_NO_VALUE_OPS.includes(sel.value);
+      if(noVal) filterEditor.conditions[idx].value = '';
+      const valInput = pop.querySelector(`[data-val-idx="${idx}"]`);
+      if(valInput){ valInput.disabled = noVal; if(noVal) valInput.value = ''; }
+    });
+  });
+  pop.querySelectorAll('[data-val-idx]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{ filterEditor.conditions[+inp.dataset.valIdx].value = inp.value; });
+  });
+  pop.querySelectorAll('[data-conn-idx]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const idx = +btn.dataset.connIdx;
+      filterEditor.conditions[idx].connector = btn.dataset.connVal;
+      pop.querySelectorAll(`[data-conn-idx="${idx}"]`).forEach(b=>{
+        b.classList.toggle('active', b.dataset.connVal===btn.dataset.connVal);
+      });
+    });
+  });
+  pop.querySelectorAll('[data-del-cond]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const idx = +btn.dataset.delCond;
+      filterEditor.conditions.splice(idx,1);
+      if(filterEditor.conditions[0]) filterEditor.conditions[0].connector = null;
+      renderFilterPopover();
+    });
+  });
+  const addBtn = pop.querySelector('[data-add-cond]');
+  if(addBtn){
+    addBtn.addEventListener('click', ()=>{
+      filterEditor.conditions.push({ connector:'AND', operator:'Equals', value:'' });
+      renderFilterPopover();
+    });
+  }
+  pop.querySelectorAll('[data-order]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const val = btn.dataset.order;
+      filterEditor.order = (filterEditor.order===val) ? null : val;
+      pop.querySelectorAll('[data-order]').forEach(b=> b.classList.toggle('active', b.dataset.order===filterEditor.order));
+    });
+  });
+
+  pop.querySelector('#filtApplyBtn').addEventListener('click', ()=>{
+    const node = nodes.find(n=>n.id===filterEditor.nodeId);
+    if(node){
+      const clean = {
+        conditions: filterEditor.conditions.map(c=>({ connector:c.connector, operator:c.operator, value:c.value })),
+        order: filterEditor.order
+      };
+      if(!node.filters) node.filters = {};
+      if(isFilterActive(clean)){
+        node.filters[filterEditor.col] = clean;
+        showToast('success', `Filter applied to "${filterEditor.col}"`);
+      } else {
+        delete node.filters[filterEditor.col];
+      }
+      pushHistory(); render();
+    }
+    closeColumnFilterPopover();
+  });
+  pop.querySelector('#filtRemoveBtn').addEventListener('click', ()=>{
+    const node = nodes.find(n=>n.id===filterEditor.nodeId);
+    if(node && node.filters && node.filters[filterEditor.col]){
+      delete node.filters[filterEditor.col];
+      pushHistory(); render();
+      showToast('info', `Filter removed from "${filterEditor.col}"`);
+    }
+    closeColumnFilterPopover();
+  });
+  pop.querySelector('#filtCancelBtn').addEventListener('click', closeColumnFilterPopover);
+}
+
+/* ============================================================
+   UI TOGGLES
+   ============================================================ */
+(function initSidebarToggle(){
+  const workspace = document.getElementById('workspace');
+  const sidebar = document.getElementById('sidebar');
+  const btn = document.getElementById('sidebarToggle');
+  btn.addEventListener('click', ()=>{
+    const collapsed = sidebar.classList.toggle('collapsed');
+    workspace.classList.toggle('sidebar-collapsed', collapsed);
+    btn.title = collapsed ? 'Expand Sidebar' : 'Collapse Sidebar';
+  });
+})();
+
+(function initMinimapToggle(){
+  const dock = document.getElementById('minimapDock');
+  const btn = document.getElementById('minimapToggle');
+  btn.addEventListener('click', ()=>{
+    const collapsed = dock.classList.toggle('collapsed');
+    btn.title = collapsed ? 'Show Minimap' : 'Hide Minimap';
+  });
+})();
+
+function renderMinimap(){
+  const svg = document.getElementById('minimapSvg');
+  svg.innerHTML='';
+  if(nodes.length===0) return;
+  const xs = nodes.map(n=>n.x), ys = nodes.map(n=>n.y);
+  const minX = Math.min(...xs)-40, maxX = Math.max(...xs)+NODE_W+40;
+  const minY = Math.min(...ys)-40, maxY = Math.max(...ys)+200;
+  const spanX = Math.max(1,maxX-minX), spanY = Math.max(1,maxY-minY);
+  const sx = 150/spanX, sy = 96/spanY, s = Math.min(sx,sy);
+  nodes.forEach(n=>{
+    const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('x', (n.x-minX)*s);
+    r.setAttribute('y', (n.y-minY)*s);
+    r.setAttribute('width', Math.max(6,NODE_W*s));
+    r.setAttribute('height', Math.max(4,60*s));
+    r.setAttribute('fill', '#004C97');
+    r.setAttribute('rx','1.5');
+    svg.appendChild(r);
+  });
+}
+
+function applyZoom(){
+  document.getElementById('canvas').style.transform = `scale(${zoom})`;
+}
+document.getElementById('zoomIn').addEventListener('click', ()=>{ zoom = Math.min(1.6, zoom+0.1); applyZoom(); });
+document.getElementById('zoomOut').addEventListener('click', ()=>{ zoom = Math.max(0.4, zoom-0.1); applyZoom(); });
+document.getElementById('zoomFit').addEventListener('click', ()=>{ zoom = 1; applyZoom(); document.getElementById('canvasWrap').scrollTo({left:0,top:0,behavior:'smooth'}); });
+document.getElementById('zoomLock').addEventListener('click', (e)=>{
+  locked = !locked;
+  e.currentTarget.classList.toggle('active', locked);
+  showToast('info', locked? 'Table positions locked':'Table positions unlocked');
+});
+
+(function initPan(){
+  const wrap = document.getElementById('canvasWrap');
+  let panning=false, sx=0, sy=0, sl=0, st=0;
+  wrap.addEventListener('mousedown', (e)=>{
+    if(e.target.closest('.tnode') || e.target.closest('.zoom-controls') || e.target.closest('.minimap-dock') || e.target.closest('.join-pill')) return;
+    panning=true; sx=e.clientX; sy=e.clientY; sl=wrap.scrollLeft; st=wrap.scrollTop;
+    wrap.classList.add('panning');
+  });
+  window.addEventListener('mousemove', (e)=>{
+    if(!panning) return;
+    wrap.scrollLeft = sl - (e.clientX-sx);
+    wrap.scrollTop = st - (e.clientY-sy);
+  });
+  window.addEventListener('mouseup', ()=>{ panning=false; wrap.classList.remove('panning'); });
+})();
+
+/* ============================================================
+   MOCK DATA & TABLE RENDER
+   ============================================================ */
+const NAMES_FIRST = ['Bjørn','Lucas','Ellie','Fernanda','Daan','František','Astrid','Helena','Marco','Wyatt','Isabelle','Tomás','Kenji','Amara','Sven','Nadia','Diego','Priya','Oscar','Mei'];
+const NAMES_LAST  = ['Hansen','Mancini','Sullivan','Ramos','Peeters','Novak','Larsen','Silva','Rossi','Brown','Girard','Alves','Sato','Diallo','Berg','Ivanova','Torres','Sharma','Nilsson','Chen'];
+const COUNTRIES   = ['Norway','Italy','Canada','Brazil','Belgium','Czech Republic','Sweden','Portugal','Germany','USA','France','Spain','Japan','Nigeria','Denmark','Russia','Chile','India','Finland','China'];
+const TRACKS      = ["Breaking The Rules","Night Of The Long Knives","Spellbound","Go Down","Dog Eat Dog","Overdose","Hell Ain't A Bad Place To Be","Love In An Elevator","Walk This Way","Livin' On The Edge","Sweet Emotion","Dream On","Crazy","Cryin'"];
+const ADDR_STREETS= ['Ullevålsveien 14','Via Degli Scipioni, 43','5112 48 Street','Qe 7 Bloco G','Grétrystraat 63','Klanova 9/506','Storgata 5','Rua da Assunção 22','Musterstrasse 8','Main St 210'];
+function seedRandom(seed){ let s = seed % 2147483647; if(s<=0) s+=2147483646;
+  return function(){ s = s*16807 % 2147483647; return (s-1)/2147483646; }; }
+function fmtDate(rand){
+  const y = 2009+Math.floor(rand()*16), m=1+Math.floor(rand()*12), d=1+Math.floor(rand()*28);
+  return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T00:00:00`;
+}
+function genValue(col, type, rand, rowIdx){
+  if(/Id$/.test(col)){
+    if(col==='TrackId') return 10+rowIdx;
+    if(col==='InvoiceLineId') return 100+rowIdx*3;
+    if(col==='InvoiceId') return 2+rowIdx;
+    if(col==='CustomerId') return 1+(rowIdx%59);
+    if(col==='AlbumId') return 1+(rowIdx%347);
+    if(col==='ArtistId') return 1+(rowIdx%275);
+    if(col==='GenreId') return 1+(rowIdx%25);
+    if(col==='MediaTypeId') return 1+(rowIdx%5);
+    if(col==='EmployeeId'||col==='SupportRepId') return 1+(rowIdx%8);
+    if(col==='PlaylistId') return 1+(rowIdx%18);
+    return 1+rowIdx;
+  }
+  switch(col){
+    case 'Name': return type==='string' ? TRACKS[rowIdx%TRACKS.length] : NAMES_FIRST[rowIdx%NAMES_FIRST.length];
+    case 'FirstName': return NAMES_FIRST[rowIdx%NAMES_FIRST.length];
+    case 'LastName': return NAMES_LAST[rowIdx%NAMES_LAST.length];
+    case 'Title': return ['Sales Manager','Support Rep','IT Staff','General Manager'][rowIdx%4];
+    case 'Company': return rand()>0.6 ? ['Acme Corp','Globex','Umbrella Ltd','Initech'][rowIdx%4] : '';
+    case 'Country': return COUNTRIES[rowIdx%COUNTRIES.length];
+    case 'BillingCountry': return COUNTRIES[rowIdx%COUNTRIES.length];
+    case 'City': case 'BillingCity': return ['Oslo','Rome','Toronto','São Paulo','Brussels','Prague'][rowIdx%6];
+    case 'State': case 'BillingState': return rand()>0.5 ? ['CA','ON','NSW','—'][rowIdx%4] : '';
+    case 'PostalCode': case 'BillingPostalCode': return String(1000+ (rowIdx*37)%8999);
+    case 'Address': case 'BillingAddress': return ADDR_STREETS[rowIdx%ADDR_STREETS.length];
+    case 'Phone': return `+${10+(rowIdx%80)} ${100+rowIdx%900} ${1000+((rowIdx*7)%9000)}`;
+    case 'Fax': return rand()>0.7 ? `+${10+(rowIdx%80)} ${100+rowIdx%900} ${1000+((rowIdx*3)%9000)}` : '';
+    case 'Email': return `${(NAMES_FIRST[rowIdx%NAMES_FIRST.length]).toLowerCase()}.${(NAMES_LAST[rowIdx%NAMES_LAST.length]).toLowerCase()}@example.com`;
+    case 'Composer': return rand()>0.3 ? ['Steven Tyler','J. Perry','A. Young','M. Jagger'][rowIdx%4] : '';
+    case 'Milliseconds': return 180000+Math.floor(rand()*200000);
+    case 'Bytes': return 3000000+Math.floor(rand()*6000000);
+    case 'UnitPrice': return (0.99).toFixed(2);
+    case 'Total': return (1+rand()*20).toFixed(2);
+    case 'Quantity': return 1+Math.floor(rand()*3);
+    case 'InvoiceDate': case 'BirthDate': case 'HireDate': return fmtDate(rand);
+    case 'ReportsTo': return rand()>0.3 ? (1+Math.floor(rand()*5)) : '';
+  }
+  return type==='string' ? '—' : Math.floor(rand()*1000);
+}
+
+function collectSelectedColumns(srcNodes){
+  const list = srcNodes || nodes;
+  const ordered = [...list].sort((a,b)=>a.order-b.order);
+  const out = [];
+  ordered.forEach(n=>{
+    SCHEMA[n.table].cols.forEach(([col,type])=>{
+      if(n.selected.has(col)) out.push({table:n.table, col, type});
+    });
+  });
+  return out;
+}
+
+/* ============================================================
+   COLUMN FILTERS — evaluation against generated mock rows
+   ============================================================ */
+function collectActiveFilterSpecs(srcNodes){
+  const list = srcNodes || nodes;
+  const filterSpecs = []; // {col, type, conditions}
+  const orderSpecs = [];  // {col, type, direction}
+  list.forEach(n=>{
+    if(!n.filters) return;
+    Object.keys(n.filters).forEach(col=>{
+      const f = n.filters[col];
+      if(!isFilterActive(f)) return;
+      const colDef = SCHEMA[n.table].cols.find(c=>c[0]===col);
+      const type = colDef ? colDef[1] : 'string';
+      const meaningfulConds = (f.conditions||[]).filter(filterConditionIsMeaningful);
+      if(meaningfulConds.length) filterSpecs.push({ col, type, conditions: meaningfulConds });
+      if(f.order==='asc' || f.order==='desc') orderSpecs.push({ col, type, direction: f.order });
+    });
+  });
+  return { filterSpecs, orderSpecs };
+}
+
+function collectGenerationColumns(cols, filterSpecs, orderSpecs){
+  const map = new Map();
+  cols.forEach(c=> map.set(c.col, c));
+  filterSpecs.forEach(s=>{ if(!map.has(s.col)) map.set(s.col, {col:s.col, type:s.type}); });
+  orderSpecs.forEach(s=>{ if(!map.has(s.col)) map.set(s.col, {col:s.col, type:s.type}); });
+  return [...map.values()];
+}
+
+function valueMatchesCondition(rawVal, type, operator, filterVal){
+  const isNumeric = (type==='int64' || type==='float64');
+  const sVal = (rawVal===undefined || rawVal===null) ? '' : String(rawVal);
+  switch(operator){
+    case 'Is null': return sVal.trim()==='';
+    case 'Is not null': return sVal.trim()!=='';
+    case 'Distinct': return true; // handled as a post-process dedup, see getMatchesForFilters
+    case 'Equals': return sVal.toLowerCase() === String(filterVal).toLowerCase();
+    case 'Not equals': return sVal.toLowerCase() !== String(filterVal).toLowerCase();
+    case 'Contains': return sVal.toLowerCase().includes(String(filterVal).toLowerCase());
+    case 'Regex':
+      try{ return new RegExp(filterVal, 'i').test(sVal); } catch(e){ return false; }
+    case 'Greater than': case 'Less than': case 'Greater than or equals': case 'Less than or equals': {
+      let a, b;
+      if(isNumeric){ a = parseFloat(sVal); b = parseFloat(filterVal); if(isNaN(a)) return false; }
+      else { a = sVal; b = String(filterVal); }
+      if(operator==='Greater than') return a>b;
+      if(operator==='Less than') return a<b;
+      if(operator==='Greater than or equals') return a>=b;
+      return a<=b; // Less than or equals
+    }
+  }
+  return true;
+}
+function rowPassesFilterSpec(rowVals, spec){
+  let result = null;
+  spec.conditions.forEach((c,i)=>{
+    const val = valueMatchesCondition(rowVals[spec.col], spec.type, c.operator, c.value);
+    result = (i===0) ? val : ((c.connector==='OR') ? (result || val) : (result && val));
+  });
+  return result===null ? true : result;
+}
+function rowPassesAllFilters(rowVals, filterSpecs){
+  return filterSpecs.every(spec=> rowPassesFilterSpec(rowVals, spec));
+}
+
+const FILTER_SCAN_LIMIT = TOTAL_ROWS; // scan the same bounded mock dataset when a filter/sort is active
+let _filterCache = { key:null, matches:null };
+function getMatchesForFilters(genCols, filterSpecs, orderSpecs){
+  const key = JSON.stringify({ f:filterSpecs, o:orderSpecs, c:genCols.map(c=>c.col) });
+  if(_filterCache.key===key) return _filterCache.matches;
+
+  const rand = seedRandom(777 + genCols.length);
+  const matches = [];
+  for(let rowIdx=0; rowIdx<FILTER_SCAN_LIMIT; rowIdx++){
+    const rowVals = {};
+    genCols.forEach(c=>{ rowVals[c.col] = genValue(c.col, c.type, rand, rowIdx); });
+    if(rowPassesAllFilters(rowVals, filterSpecs)) matches.push(rowVals);
+  }
+  // "Distinct" operator: dedupe on that column's value, keeping the first occurrence
+  filterSpecs.forEach(spec=>{
+    if(spec.conditions.some(c=>c.operator==='Distinct')){
+      const seen = new Set();
+      for(let i=matches.length-1;i>=0;i--){
+        const k = String(matches[i][spec.col]);
+        if(seen.has(k)) matches.splice(i,1); else seen.add(k);
+      }
+    }
+  });
+  if(orderSpecs.length){
+    matches.sort((a,b)=>{
+      for(const o of orderSpecs){
+        const isNumeric = (o.type==='int64' || o.type==='float64');
+        let av = a[o.col], bv = b[o.col];
+        if(isNumeric){ av = parseFloat(av); bv = parseFloat(bv); }
+        if(av<bv) return o.direction==='asc' ? -1 : 1;
+        if(av>bv) return o.direction==='asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }
+  _filterCache = { key, matches };
+  return matches;
+}
+
+function renderData(page){
+  const scroll = document.getElementById('dataScroll');
+  const footer = document.getElementById('dataFooter');
+  const cols = collectSelectedColumns(committedNodes);
+  const noTables = committedNodes.length===0;
+  const noColumns = !noTables && cols.length===0;
+  const notJoined = committedNodes.length>1 && committedConns.length===0;
+
+  if(noTables || noColumns || notJoined || !hasRunQuery){
+    let msg = 'No data to display yet';
+    if(notJoined) msg = 'Join the tables together to see data';
+    else if(noColumns) msg = 'Select at least one column to see data';
+    scroll.innerHTML = `<div class="empty-state">
+      ${ICONS.table}
+      <div>${msg}</div>
+    </div>`;
+    footer.innerHTML = '';
+    return;
+  }
+
+  const { filterSpecs, orderSpecs } = collectActiveFilterSpecs(committedNodes);
+  const hasFilterOrOrder = filterSpecs.length>0 || orderSpecs.length>0;
+  const thead = '<tr>'+cols.map(c=>`<th>${c.col}</th>`).join('')+'</tr>';
+  let rowsHtml = '', from, to, totalCount, totalPages;
+
+  if(!hasFilterOrOrder){
+    // ---- original fast path: no filters/sort active, generate this page directly ----
+    const rand = seedRandom(1000*page + cols.length);
+    const startIdx = (page-1)*ROWS_PER_PAGE;
+    for(let i=0;i<ROWS_PER_PAGE;i++){
+      const rowIdx = startIdx+i;
+      rowsHtml += '<tr>'+cols.map(c=>`<td>${genValue(c.col,c.type,rand,rowIdx)}</td>`).join('')+'</tr>';
+    }
+    from = startIdx+1; to = Math.min(TOTAL_ROWS, startIdx+ROWS_PER_PAGE);
+    totalCount = TOTAL_ROWS;
+    totalPages = Math.ceil(TOTAL_ROWS/ROWS_PER_PAGE);
+  } else {
+    // ---- filtered/sorted path: materialize a bounded pool of matching rows, then paginate ----
+    const genCols = collectGenerationColumns(cols, filterSpecs, orderSpecs);
+    const matches = getMatchesForFilters(genCols, filterSpecs, orderSpecs);
+    totalCount = matches.length;
+    totalPages = Math.max(1, Math.ceil(totalCount/ROWS_PER_PAGE));
+    if(page>totalPages) page = totalPages;
+    if(page!==curPage) curPage = page;
+    const startIdx = (page-1)*ROWS_PER_PAGE;
+    const pageRows = matches.slice(startIdx, startIdx+ROWS_PER_PAGE);
+    rowsHtml = pageRows.map(rv=> '<tr>'+cols.map(c=>`<td>${rv[c.col]}</td>`).join('')+'</tr>').join('');
+    from = totalCount===0 ? 0 : startIdx+1;
+    to = Math.min(totalCount, startIdx+ROWS_PER_PAGE);
+  }
+
+  scroll.innerHTML = rowsHtml
+    ? `<table class="dgrid"><thead>${thead}</thead><tbody>${rowsHtml}</tbody></table>`
+    : `<div class="empty-state">${ICONS.table}<div>No rows match the current filter${filterSpecs.length>1?'s':''}</div></div>`;
+
+  // Fixed pagination layout logic
+  let pager = `<button ${page===1?'disabled':''} data-p="${page-1}">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+  </button>`;
+  
+  const pages = [];
+  for(let p=1;p<=totalPages;p++){
+    if(p<=3 || p>totalPages-3 || Math.abs(p-page)<=1) pages.push(p);
+  }
+  
+  let last=0;
+  pages.forEach(p=>{
+    if(last && p-last>1) pager += `<button disabled>…</button>`;
+    pager += `<button class="${p===page?'cur':''}" data-p="${p}">${p}</button>`;
+    last=p;
+  });
+  
+  pager += `<button ${page===totalPages?'disabled':''} data-p="${page+1}">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+  </button>`;
+
+  // Footer layout updated to contain both text, dropdown, and the paginator (responsive grouping)
+  footer.innerHTML = `
+    <div>Results : ${from}-${to} of ${totalCount.toLocaleString()}${hasFilterOrOrder?' (filtered)':''}</div>
+    <div class="footer-right">
+      <div class="footer-rpp">
+        Rows Per Page :
+        <button type="button" class="rpp-trigger" id="footerRppTrigger">
+          <span class="rpp-trigger-label">${ROWS_PER_PAGE.toLocaleString()}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+      <div class="pager">${pager}</div>
+    </div>`;
+
+  // Bind footer dropdown trigger (custom Rows Per Page control)
+  attachRppTrigger(document.getElementById('footerRppTrigger'));
+
+  footer.querySelectorAll('.pager button[data-p]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const p = parseInt(b.dataset.p,10);
+      if(p>=1 && p<=totalPages){ curPage=p; renderData(curPage); }
+    });
+  });
+}
+
+function setTab(tab){
+  activeTab = tab;
+  document.getElementById('tabBtnData').classList.toggle('active', tab==='data');
+  document.getElementById('tabData').hidden = tab!=='data';
+  if(tab==='data') renderData(curPage);
+}
+document.getElementById('tabBtnData').addEventListener('click', ()=>setTab('data'));
+
+// Rows-Per-Page control: single click opens preset menu, double click edits a custom number inline
+attachRppTrigger(document.getElementById('rppTrigger'));
+
+const RPP_PRESETS = [25,50,100,200,500];
+let openRppMenu = null;
+let rppClickTimer = null;
+
+function getDataTotalCount(){
+  const cols = collectSelectedColumns(committedNodes);
+  const noTables = committedNodes.length===0;
+  if(noTables || cols.length===0 || (committedNodes.length>1 && committedConns.length===0)) return 0;
+  const { filterSpecs, orderSpecs } = collectActiveFilterSpecs(committedNodes);
+  const hasFilterOrOrder = filterSpecs.length>0 || orderSpecs.length>0;
+  if(!hasFilterOrOrder) return TOTAL_ROWS;
+  const genCols = collectGenerationColumns(cols, filterSpecs, orderSpecs);
+  return getMatchesForFilters(genCols, filterSpecs, orderSpecs).length;
+}
+
+function rppTriggerMarkup(){
+  return `<span class="rpp-trigger-label">${ROWS_PER_PAGE.toLocaleString()}</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+}
+
+function applyRowsPerPage(v){
+  v = Math.max(1, Math.floor(v));
+  ROWS_PER_PAGE = v;
+  curPage = 1;
+  const toolbarTrigger = document.getElementById('rppTrigger');
+  if(toolbarTrigger && !toolbarTrigger.classList.contains('editing')) toolbarTrigger.innerHTML = rppTriggerMarkup();
+  if(activeTab==='data') renderData(curPage);
+}
+
+// Attaches the click (open menu) / double-click (inline edit) behavior to a trigger button.
+// A short delay disambiguates a single click from the first half of a double click.
+function attachRppTrigger(el){
+  if(!el) return;
+  el.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    if(el.classList.contains('editing')) return;
+    if(rppClickTimer){ clearTimeout(rppClickTimer); rppClickTimer=null; return; }
+    rppClickTimer = setTimeout(()=>{ rppClickTimer=null; toggleRppMenu(el); }, 220);
+  });
+  el.addEventListener('dblclick', (e)=>{
+    e.stopPropagation();
+    if(rppClickTimer){ clearTimeout(rppClickTimer); rppClickTimer=null; }
+    closeRppMenu();
+    startRppEdit(el);
+  });
+}
+
+// Turns the trigger into an inline <input> so the user can type an exact custom value,
+// the same way the font-size box works in Google Slides.
+function startRppEdit(el){
+  if(el.classList.contains('editing')) return;
+  el.classList.add('editing');
+  const total = getDataTotalCount();
+  el.innerHTML = `<input type="number" class="rpp-edit-input" min="1" max="${total||999999}" value="${ROWS_PER_PAGE}">`;
+  const input = el.querySelector('.rpp-edit-input');
+  input.focus();
+  input.select();
+  input.addEventListener('click', e=>e.stopPropagation());
+  input.addEventListener('dblclick', e=>e.stopPropagation());
+  const finish = (commit)=>{
+    if(commit){
+      const v = parseInt(input.value, 10);
+      if(v && v>0) applyRowsPerPage(total>0 ? Math.min(v,total) : v);
+    }
+    if(document.body.contains(el)){
+      el.classList.remove('editing');
+      el.innerHTML = rppTriggerMarkup();
+    }
+  };
+  input.addEventListener('keydown', (e)=>{
+    e.stopPropagation();
+    if(e.key==='Enter') finish(true);
+    else if(e.key==='Escape') finish(false);
+  });
+  input.addEventListener('blur', ()=> finish(true));
+}
+
+function toggleRppMenu(anchorEl){
+  if(openRppMenu){ closeRppMenu(); return; }
+  const total = getDataTotalCount();
+  const menu = document.createElement('div');
+  menu.className = 'rpp-popover';
+  const presetsHtml = RPP_PRESETS.map(n=>
+    `<button type="button" class="rpp-popover-item ${ROWS_PER_PAGE===n?'sel':''}" data-val="${n}">${n}</button>`
+  ).join('');
+  menu.innerHTML = `
+    ${presetsHtml}
+    <div class="rpp-popover-divider"></div>
+    <button type="button" class="rpp-popover-item ${total>0 && ROWS_PER_PAGE===total?'sel':''}" data-val="${total}">${total.toLocaleString()}</button>
+    <div class="rpp-popover-hint">Double-click the value to type a custom number</div>
+  `;
+  document.body.appendChild(menu);
+  const r = anchorEl.getBoundingClientRect();
+  menu.style.top = (r.bottom+6)+'px';
+  let left = r.left;
+  const maxLeft = window.innerWidth - 200;
+  if(left > maxLeft) left = maxLeft;
+  menu.style.left = Math.max(8,left)+'px';
+  openRppMenu = menu;
+
+  menu.querySelectorAll('.rpp-popover-item[data-val]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const v = parseInt(btn.dataset.val, 10);
+      if(!v || v<1) return;
+      applyRowsPerPage(v);
+      closeRppMenu();
+    });
+  });
+
+  setTimeout(()=> document.addEventListener('click', closeRppMenuOnce), 0);
+}
+function closeRppMenuOnce(){ closeRppMenu(); }
+function closeRppMenu(){
+  if(openRppMenu){ openRppMenu.remove(); openRppMenu=null; }
+  document.removeEventListener('click', closeRppMenuOnce);
+}
+
+/* ============================================================
+   FULL SCREEN DATA VIEW (Updated Logic)
+   ============================================================ */
+let isFullScreen = false;
+
+document.getElementById('fsBtn').addEventListener('click', ()=>{
+  isFullScreen = true;
+  document.querySelector('.app').classList.add('fullscreen');
+  document.getElementById('bottomPanel').style.flexBasis = '';
+  document.getElementById('bottomPanel').classList.remove('expanded');
+});
+
+document.getElementById('minBtn').addEventListener('click', ()=>{
+  isFullScreen = false;
+  document.querySelector('.app').classList.remove('fullscreen');
+});
+
+document.getElementById('navTabDE').addEventListener('click', ()=>{
+  showToast('info', 'Data Explorer is under development');
+});
+
+(function initPanelResize(){
+  const panel = document.getElementById('bottomPanel');
+  const handle = document.getElementById('panelResizeHandle');
+  const MIN_H = 140;
+  let dragging=false, startY=0, startH=0;
+
+  function clampHeight(h){
+    const maxH = window.innerHeight - 220;
+    return Math.min(Math.max(h, MIN_H), Math.max(maxH, MIN_H));
+  }
+  function beginDrag(clientY){
+    dragging = true; startY = clientY; startH = panel.getBoundingClientRect().height;
+    panel.classList.remove('expanded'); panel.classList.add('resizing');
+    document.body.style.userSelect = 'none'; document.body.style.cursor = 'row-resize';
+  }
+  function moveDrag(clientY){
+    if(!dragging) return;
+    const newH = clampHeight(startH - (clientY - startY));
+    panel.style.flexBasis = newH + 'px';
+  }
+  function endDrag(){
+    if(!dragging) return;
+    dragging = false; panel.classList.remove('resizing');
+    document.body.style.userSelect = ''; document.body.style.cursor = '';
+  }
+
+  handle.addEventListener('mousedown', (e)=>{ e.preventDefault(); beginDrag(e.clientY); });
+  window.addEventListener('mousemove', (e)=>{ if(dragging) moveDrag(e.clientY); });
+  window.addEventListener('mouseup', endDrag);
+
+  handle.addEventListener('touchstart', (e)=>{ beginDrag(e.touches[0].clientY); }, {passive:true});
+  window.addEventListener('touchmove', (e)=>{ if(dragging){ moveDrag(e.touches[0].clientY); } }, {passive:true});
+  window.addEventListener('touchend', endDrag);
+
+  handle.addEventListener('dblclick', ()=>{
+    panel.style.flexBasis = ''; panel.classList.remove('expanded');
+  });
+})();
+
+/* ============================================================
+   TOOLBAR ACTIONS
+   ============================================================ */
+document.getElementById('btnUndo').addEventListener('click', ()=>{
+  if(history.length===0) return;
+  future.push(snapshot()); const snap = history.pop(); restore(snap); updateUndoRedoBtns();
+});
+document.getElementById('btnRedo').addEventListener('click', ()=>{
+  if(future.length===0) return;
+  history.push(snapshot()); const snap = future.pop(); restore(snap); updateUndoRedoBtns();
+});
+document.getElementById('btnRun').addEventListener('click', ()=>{
+  const cols = collectSelectedColumns();
+  if(nodes.length===0 || cols.length===0){
+    commitRunSnapshot();
+    hasRunQuery = true;
+    curPage = 1;
+    if(activeTab==='data') renderData(curPage);
+    showToast('info','Add a table and select columns before clicking Run');
+    return;
+  }
+  commitRunSnapshot();
+  const btn = document.getElementById('btnRun');
+  const old = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" stroke-dasharray="42" stroke-dashoffset="14"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".7s" repeatCount="indefinite"/></circle></svg> Processing...`;
+  setTimeout(()=>{
+    btn.disabled=false; btn.innerHTML = old;
+    hasRunQuery = true;
+    curPage = 1; setTab('data');
+    showToast('success','Query executed successfully');
+  }, 700);
+});
+document.getElementById('btnSave').addEventListener('click', ()=>{
+  if(nodes.length===0){ showToast('info','Add a table and select columns before saving the query'); return; }
+  openSaveQueryModal();
+});
+document.getElementById('btnClear').addEventListener('click', ()=>{
+  if(nodes.length===0){ showToast('info','There is nothing on the workspace'); return; }
+  openConfirmModal();
+});
+document.getElementById('btnPivot').addEventListener('click', ()=>{
+  if(nodes.length===0){ showToast('info','Add a table before switching to Pivot'); return; }
+  if(nodes.length>1 && conns.length===0){ showToast('info','Join the tables together before switching to Pivot'); return; }
+  enterPivotMode();
+});
+
+/* ============================================================
+   PIVOT MODE — Google Sheets–style pivot table editor
+   ============================================================
+   The right-hand "Pivot table editor" panel has four sections — Rows,
+   Columns, Values, Filters — each with its own "+ Add" button that opens
+   a small searchable field picker. Every field placed in Rows/Columns
+   gets its own Order / Sort by / Show totals controls; every field in
+   Values gets Summarize by / Show as controls; every field in Filters
+   opens a checkbox list of that column's distinct values. Any change
+   recomputes and re-renders the results grid on the left immediately —
+   there's no separate "Run" step, matching Sheets' live pivot table.
+   ============================================================ */
+
+function enterPivotMode(){
+  appMode = 'pivot';
+  pivotFields = [];
+  [...nodes].sort((a,b)=>a.order-b.order).forEach(n=>{
+    SCHEMA[n.table].cols.forEach(([col,type])=>{
+      pivotFields.push({ table:n.table, col, type, label:`${n.table}.${col}` });
+    });
+  });
+  pivotRows = []; pivotCols = []; pivotValues = []; pivotFilters = [];
+  pivotHasRun = false; pivotResult = null; pivotCurPage = 1; pivotRPP = 100;
+
+  document.querySelector('.app').classList.add('mode-pivot');
+  document.querySelector('.app').classList.remove('fullscreen');
+  document.getElementById('pivotEditor').classList.remove('closed');
+  document.getElementById('pivotPage').classList.remove('editor-collapsed');
+  renderPivotEditor();
+  renderPivotResults();
+}
+
+function exitPivotMode(){
+  appMode = 'visual';
+  document.querySelector('.app').classList.remove('mode-pivot');
+  document.querySelector('.app').classList.remove('fullscreen');
+  closePivotRppMenu();
+  closePivotFloatingPopover();
+}
+
+document.getElementById('btnBackToVisual').addEventListener('click', exitPivotMode);
+
+document.getElementById('pivotEditorToggle').addEventListener('click', ()=>{
+  const panel = document.getElementById('pivotEditor');
+  const page = document.getElementById('pivotPage');
+  const arrowBtn = document.getElementById('pivotEditorToggle');
+  const collapsed = panel.classList.toggle('closed');
+  page.classList.toggle('editor-collapsed', collapsed);
+  arrowBtn.title = collapsed ? 'Expand Editor' : 'Collapse Editor';
+});
+
+/* ---------------- Floating popovers (field picker & filter values) ---------------- */
+function pivotPopoverOutsideClick(e){
+  if(pivotOpenPopoverEl && !pivotOpenPopoverEl.contains(e.target)) closePivotFloatingPopover();
+}
+function closePivotFloatingPopover(){
+  if(pivotOpenPopoverEl){
+    pivotOpenPopoverEl.remove();
+    pivotOpenPopoverEl = null;
+    document.removeEventListener('mousedown', pivotPopoverOutsideClick, true);
+  }
+}
+function openPivotFloatingPopover(anchorEl, popEl){
+  closePivotFloatingPopover();
+  popEl.style.visibility = 'hidden';
+  document.body.appendChild(popEl);
+  const r = anchorEl.getBoundingClientRect();
+  const pw = popEl.offsetWidth, ph = popEl.offsetHeight;
+  let left = Math.min(Math.max(8, r.right - pw), window.innerWidth - pw - 8);
+  let top = r.bottom + 6;
+  if(top + ph > window.innerHeight - 8) top = Math.max(8, r.top - ph - 6);
+  popEl.style.top = top + 'px';
+  popEl.style.left = left + 'px';
+  popEl.style.visibility = '';
+  pivotOpenPopoverEl = popEl;
+  setTimeout(()=> document.addEventListener('mousedown', pivotPopoverOutsideClick, true), 0);
+}
+
+/* ---------------- Zone helpers ---------------- */
+function pivotZoneArray(zone){
+  return zone==='rows' ? pivotRows : zone==='cols' ? pivotCols : zone==='values' ? pivotValues : pivotFilters;
+}
+function valueFieldSortOptions(){
+  return pivotValues.map(v=>({ id:String(v._id), label:`${AGG_LABELS[v.agg]} of ${v.label}` }));
+}
+function addPivotField(zone, field){
+  if(zone==='rows' || zone==='cols'){
+    pivotZoneArray(zone).push({ _id:++pivotFieldSeq, table:field.table, col:field.col, type:field.type,
+      label:field.label, order:'asc', sortBy:'self', showTotals:true });
+  } else if(zone==='values'){
+    const isNumeric = field.type==='int64' || field.type==='float64';
+    pivotValues.push({ _id:++pivotFieldSeq, table:field.table, col:field.col, type:field.type,
+      label:field.label, agg: isNumeric ? 'sum' : 'count', showAs:'default' });
+  }
+}
+function removePivotField(zone, id){
+  if(zone==='rows') pivotRows = pivotRows.filter(x=>String(x._id)!==String(id));
+  else if(zone==='cols') pivotCols = pivotCols.filter(x=>String(x._id)!==String(id));
+  else if(zone==='values'){
+    pivotValues = pivotValues.filter(x=>String(x._id)!==String(id));
+    [...pivotRows, ...pivotCols].forEach(f=>{ if(String(f.sortBy)===String(id)) f.sortBy='self'; });
+  } else if(zone==='filters') pivotFilters = pivotFilters.filter(x=>String(x._id)!==String(id));
+  refreshPivotEditor();
+  resetPivotResult();
+}
+
+/* ---------------- Field picker popover (Rows / Columns / Values / Filters "+ Add") ---------------- */
+function openFieldPickerPopover(zone, anchorEl){
+  const usedKeys = zone==='values' ? new Set() : new Set(pivotZoneArray(zone).map(x=>x.table+'\u0001'+x.col));
+  const filterUsedKeys = new Set(pivotFilters.map(x=>x.table+'\u0001'+x.col));
+  const pop = document.createElement('div');
+  pop.className = 'pivot-popover pivot-field-popover';
+  pop.innerHTML = `<input type="text" class="pivot-popover-search" placeholder="Search column ...">
+    <div class="pivot-popover-list"></div>`;
+  const listEl = pop.querySelector('.pivot-popover-list');
+  const searchEl = pop.querySelector('.pivot-popover-search');
+  function renderList(term){
+    term = (term||'').trim().toLowerCase();
+    const excl = zone==='filters' ? filterUsedKeys : usedKeys;
+    const items = pivotFields.filter(f=> !excl.has(f.table+'\u0001'+f.col) && (!term || f.label.toLowerCase().includes(term)));
+    listEl.innerHTML = items.length ? items.map(f=>`
+      <button type="button" class="pivot-popover-item" data-table="${escapeAttr(f.table)}" data-col="${escapeAttr(f.col)}" data-type="${escapeAttr(f.type)}">
+        <span class="pivot-popover-item-name">${escapeHtml(f.label)}</span>
+        <span class="pivot-popover-item-type">${escapeHtml(f.type)}</span>
+      </button>`).join('') : `<div class="pivot-field-empty">No matching columns</div>`;
+    listEl.querySelectorAll('.pivot-popover-item').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const field = { table:btn.dataset.table, col:btn.dataset.col, type:btn.dataset.type, label:`${btn.dataset.table}.${btn.dataset.col}` };
+        closePivotFloatingPopover();
+        if(zone==='filters'){ addPivotFilterField(field); }
+        else { addPivotField(zone, field); refreshPivotEditor(); resetPivotResult(); }
+      });
+    });
+  }
+  renderList('');
+  searchEl.addEventListener('input', ()=> renderList(searchEl.value));
+  openPivotFloatingPopover(anchorEl, pop);
+  setTimeout(()=> searchEl.focus(), 0);
+}
+
+/* ---------------- Filters: distinct-value checklist popover ---------------- */
+function getDistinctValuesForField(field){
+  const rand = seedRandom(9001 + field.col.length*13 + field.table.length*7);
+  const set = new Set();
+  for(let i=0;i<TOTAL_ROWS;i++) set.add(String(genValue(field.col, field.type, rand, i)));
+  return [...set].sort((a,b)=> a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'}));
+}
+function addPivotFilterField(field){
+  const allValues = getDistinctValuesForField(field);
+  const item = { _id:++pivotFieldSeq, table:field.table, col:field.col, type:field.type, label:field.label,
+    allValues, selected:new Set(allValues) };
+  pivotFilters.push(item);
+  refreshPivotEditor();
+  resetPivotResult();
+  setTimeout(()=>{
+    const anchor = document.querySelector(`.pivot-filter-summary[data-filter-edit="${item._id}"]`);
+    if(anchor) openPivotFilterValuesPopover(item, anchor);
+  }, 20);
+}
+function openPivotFilterValuesPopover(item, anchorEl){
+  const pop = document.createElement('div');
+  pop.className = 'pivot-popover pivot-filter-popover';
+  pop.innerHTML = `
+    <input type="text" class="pivot-popover-search" placeholder="Search values ...">
+    <div class="pivot-filter-actions">
+      <button type="button" data-act="all">Select all</button>
+      <button type="button" data-act="none">Clear</button>
+    </div>
+    <div class="pivot-filter-values"></div>
+    <div class="pivot-filter-footer">
+      <button type="button" class="pivot-btn-cancel" data-act="cancel">Cancel</button>
+      <button type="button" class="pivot-btn-ok" data-act="ok">OK</button>
+    </div>`;
+  const localSelected = new Set(item.selected);
+  const valuesEl = pop.querySelector('.pivot-filter-values');
+  function renderValues(term){
+    term = (term||'').trim().toLowerCase();
+    const filtered = item.allValues.filter(v=> !term || v.toLowerCase().includes(term));
+    valuesEl.innerHTML = filtered.length ? filtered.map(v=>`
+      <label class="pivot-filter-item">
+        <input type="checkbox" data-v="${escapeAttr(v)}" ${localSelected.has(v)?'checked':''}>
+        <span>${escapeHtml(v)}</span>
+      </label>`).join('') : `<div class="pivot-field-empty">No matching values</div>`;
+    valuesEl.querySelectorAll('input[type=checkbox]').forEach(chk=>{
+      chk.addEventListener('change', ()=>{ chk.checked ? localSelected.add(chk.dataset.v) : localSelected.delete(chk.dataset.v); });
+    });
+  }
+  renderValues('');
+  pop.querySelector('.pivot-popover-search').addEventListener('input', e=> renderValues(e.target.value));
+  pop.querySelector('[data-act="all"]').addEventListener('click', ()=>{ item.allValues.forEach(v=>localSelected.add(v)); renderValues(pop.querySelector('.pivot-popover-search').value); });
+  pop.querySelector('[data-act="none"]').addEventListener('click', ()=>{ localSelected.clear(); renderValues(pop.querySelector('.pivot-popover-search').value); });
+  pop.querySelector('[data-act="cancel"]').addEventListener('click', closePivotFloatingPopover);
+  pop.querySelector('[data-act="ok"]').addEventListener('click', ()=>{
+    item.selected = new Set(localSelected);
+    closePivotFloatingPopover();
+    refreshPivotEditor();
+    resetPivotResult();
+  });
+  openPivotFloatingPopover(anchorEl, pop);
+}
+
+/* ---------------- Editor panel rendering ---------------- */
+function renderRowColBox(item, zone){
+  const sortOpts = valueFieldSortOptions();
+  return `
+  <div class="pivot-field-box" data-id="${item._id}" data-zone="${zone}">
+    <div class="pivot-field-box-head">
+      <span class="pivot-field-box-name" title="${escapeAttr(item.label)}">${escapeHtml(item.label)}</span>
+      <button type="button" class="pivot-field-box-del" data-zone="${zone}" data-id="${item._id}" title="Remove">${ICONS.close}</button>
+    </div>
+    <div class="pivot-config-row">
+      <label>Order</label>
+      <select class="pivot-select-sm" data-cfg="order" data-zone="${zone}" data-id="${item._id}">
+        <option value="asc" ${item.order==='asc'?'selected':''}>Ascending</option>
+        <option value="desc" ${item.order==='desc'?'selected':''}>Descending</option>
+      </select>
+    </div>
+    <div class="pivot-config-row">
+      <label>Sort by</label>
+      <select class="pivot-select-sm" data-cfg="sortBy" data-zone="${zone}" data-id="${item._id}">
+        <option value="self" ${item.sortBy==='self'?'selected':''}>${escapeHtml(item.label)}</option>
+        ${sortOpts.map(o=>`<option value="${o.id}" ${item.sortBy===o.id?'selected':''}>${escapeHtml(o.label)}</option>`).join('')}
+      </select>
+    </div>
+    <label class="pivot-checkbox-row">
+      <input type="checkbox" data-cfg="showTotals" data-zone="${zone}" data-id="${item._id}" ${item.showTotals?'checked':''}>
+      <span>Show totals</span>
+    </label>
+  </div>`;
+}
+function renderValueBox(item){
+  return `
+  <div class="pivot-field-box" data-id="${item._id}" data-zone="values">
+    <div class="pivot-field-box-head">
+      <span class="pivot-field-box-name" title="${escapeAttr(AGG_LABELS[item.agg]+' of '+item.label)}">${escapeHtml(AGG_LABELS[item.agg])} of ${escapeHtml(item.label)}</span>
+      <button type="button" class="pivot-field-box-del" data-zone="values" data-id="${item._id}" title="Remove">${ICONS.close}</button>
+    </div>
+    <div class="pivot-config-row">
+      <label>Summarize by</label>
+      <select class="pivot-select-sm" data-cfg="agg" data-zone="values" data-id="${item._id}">
+        <option value="sum" ${item.agg==='sum'?'selected':''}>SUM</option>
+        <option value="count" ${item.agg==='count'?'selected':''}>COUNT</option>
+        <option value="avg" ${item.agg==='avg'?'selected':''}>AVERAGE</option>
+        <option value="min" ${item.agg==='min'?'selected':''}>MIN</option>
+        <option value="max" ${item.agg==='max'?'selected':''}>MAX</option>
+      </select>
+    </div>
+    <div class="pivot-config-row">
+      <label>Show as</label>
+      <select class="pivot-select-sm" data-cfg="showAs" data-zone="values" data-id="${item._id}">
+        <option value="default" ${item.showAs==='default'?'selected':''}>Default</option>
+        <option value="pct_grand" ${item.showAs==='pct_grand'?'selected':''}>% of grand total</option>
+        <option value="pct_row" ${item.showAs==='pct_row'?'selected':''}>% of row</option>
+        <option value="pct_col" ${item.showAs==='pct_col'?'selected':''}>% of column</option>
+      </select>
+    </div>
+  </div>`;
+}
+function renderFilterBox(item){
+  const total = item.allValues.length, sel = item.selected.size;
+  return `
+  <div class="pivot-field-box pivot-filter-box" data-id="${item._id}" data-zone="filters">
+    <div class="pivot-field-box-head">
+      <span class="pivot-field-box-name" title="${escapeAttr(item.label)}">${escapeHtml(item.label)}</span>
+      <button type="button" class="pivot-field-box-del" data-zone="filters" data-id="${item._id}" title="Remove">${ICONS.close}</button>
+    </div>
+    <button type="button" class="pivot-filter-summary" data-filter-edit="${item._id}">
+      ${sel===total ? 'Showing all items' : `${sel} of ${total} selected`}
+    </button>
+  </div>`;
+}
+function renderPivotEditor(){
+  document.getElementById('pivotRowsBoxes').innerHTML = pivotRows.map(f=>renderRowColBox(f,'rows')).join('');
+  document.getElementById('pivotColsBoxes').innerHTML = pivotCols.map(f=>renderRowColBox(f,'cols')).join('');
+  document.getElementById('pivotValuesBoxes').innerHTML = pivotValues.map(renderValueBox).join('');
+  const pivotFiltersBoxesEl = document.getElementById('pivotFiltersBoxes');
+  if(pivotFiltersBoxesEl) pivotFiltersBoxesEl.innerHTML = pivotFilters.map(renderFilterBox).join('');
+
+  document.querySelectorAll('.pivot-field-box-del').forEach(btn=>{
+    btn.addEventListener('click', ()=> removePivotField(btn.dataset.zone, btn.dataset.id));
+  });
+  document.querySelectorAll('.pivot-select-sm[data-cfg]').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const item = pivotZoneArray(sel.dataset.zone).find(x=>String(x._id)===String(sel.dataset.id));
+      if(!item) return;
+      item[sel.dataset.cfg] = sel.value;
+      refreshPivotEditor();
+      resetPivotResult();
+    });
+  });
+  document.querySelectorAll('.pivot-checkbox-row input[data-cfg="showTotals"]').forEach(chk=>{
+    chk.addEventListener('change', ()=>{
+      const item = pivotZoneArray(chk.dataset.zone).find(x=>String(x._id)===String(chk.dataset.id));
+      if(item){ item.showTotals = chk.checked; resetPivotResult(); }
+    });
+  });
+  document.querySelectorAll('[data-filter-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const item = pivotFilters.find(x=>String(x._id)===String(btn.dataset.filterEdit));
+      if(item) openPivotFilterValuesPopover(item, btn);
+    });
+  });
+}
+function refreshPivotEditor(){ renderPivotEditor(); }
+
+document.querySelectorAll('[data-add-zone]').forEach(btn=>{
+  btn.addEventListener('click', ()=> openFieldPickerPopover(btn.dataset.addZone, btn));
+});
+
+/* ---------------- Aggregation engine ---------------- */
+function round2(n){ return Math.round(n*100)/100; }
+function mergeAggInto(target, agg){
+  target.sum += agg.sum; target.count += agg.count;
+  if(agg.min<target.min) target.min = agg.min;
+  if(agg.max>target.max) target.max = agg.max;
+}
+function aggToValue(agg, aggType){
+  switch(aggType){
+    case 'count': return agg.count;
+    case 'sum': return round2(agg.sum);
+    case 'avg': return agg.count ? round2(agg.sum/agg.count) : 0;
+    case 'min': return agg.count && isFinite(agg.min) ? round2(agg.min) : 0;
+    case 'max': return agg.count && isFinite(agg.max) ? round2(agg.max) : 0;
+    default: return 0;
+  }
+}
+function formatShowAs(raw, vf, ctx){
+  if(vf.showAs==='default' || typeof raw!=='number') return raw;
+  const base = vf.showAs==='pct_grand' ? ctx.grandTotal : vf.showAs==='pct_row' ? ctx.rowTotal : ctx.colTotal;
+  return base ? (raw/base*100).toFixed(1)+'%' : '0.0%';
+}
+function compareLabels(la, lb, type){
+  if(type==='int64' || type==='float64') return (parseFloat(la)||0) - (parseFloat(lb)||0);
+  return String(la).localeCompare(String(lb), undefined, {numeric:true, sensitivity:'base'});
+}
+
+function computePivotResult(){
+  const neededCols = new Map();
+  [...pivotRows, ...pivotCols, ...pivotValues, ...pivotFilters].forEach(f=>{
+    if(!neededCols.has(f.col)) neededCols.set(f.col, { col:f.col, type:f.type });
+  });
+  const genCols = [...neededCols.values()];
+  const rand = seedRandom(4242 + genCols.length + pivotRows.length*7 + pivotCols.length*13);
+  let sourceRows = [];
+  for(let i=0;i<TOTAL_ROWS;i++){
+    const rv = {};
+    genCols.forEach(c=>{ rv[c.col] = genValue(c.col, c.type, rand, i); });
+    sourceRows.push(rv);
+  }
+  if(pivotFilters.length){
+    sourceRows = sourceRows.filter(rv=> pivotFilters.every(f=> f.selected.has(String(rv[f.col]))));
+  }
+
+  const rowKeyOf = rv => pivotRows.map(f=>String(rv[f.col])).join('\u0001');
+  const rowLabelOf = rv => pivotRows.map(f=>String(rv[f.col]));
+  const colKeyOf = rv => pivotCols.map(f=>String(rv[f.col])).join('\u0001');
+  const colLabelOf = rv => pivotCols.map(f=>String(rv[f.col])).join(' / ');
+
+  const rowMap = new Map();   // rowKey -> label array
+  const colMap = new Map();   // colKey -> label string
+  let colsTruncated = false;
+  sourceRows.forEach(rv=>{
+    const rk = rowKeyOf(rv);
+    if(!rowMap.has(rk)) rowMap.set(rk, rowLabelOf(rv));
+    const ck = colKeyOf(rv);
+    if(!colMap.has(ck)){
+      if(colMap.size < PIVOT_MAX_COLS) colMap.set(ck, colLabelOf(rv));
+      else colsTruncated = true;
+    }
+  });
+
+  // buckets: rowKey -> Map(colKey -> [{sum,count,min,max} per value field])
+  const buckets = new Map();
+  sourceRows.forEach(rv=>{
+    const ck = colKeyOf(rv);
+    if(!colMap.has(ck)) return; // beyond the column cap
+    const rk = rowKeyOf(rv);
+    if(!buckets.has(rk)) buckets.set(rk, new Map());
+    const rowBucket = buckets.get(rk);
+    if(!rowBucket.has(ck)) rowBucket.set(ck, pivotValues.map(()=>({sum:0,count:0,min:Infinity,max:-Infinity})));
+    const cellArr = rowBucket.get(ck);
+    pivotValues.forEach((vf,vi)=>{
+      const raw = rv[vf.col];
+      const num = parseFloat(raw);
+      const isNum = !isNaN(num) && raw!=='' && raw!==null && raw!==undefined;
+      const agg = cellArr[vi];
+      agg.count += 1;
+      if(isNum){ agg.sum += num; if(num<agg.min) agg.min=num; if(num>agg.max) agg.max=num; }
+    });
+  });
+
+  // Margins (row totals / column totals / grand total), computed straight from the
+  // raw buckets so SUM/COUNT/AVERAGE/MIN/MAX all total up correctly — not just SUM.
+  const emptyAgg = ()=> pivotValues.map(()=>({sum:0,count:0,min:Infinity,max:-Infinity}));
+  const rowMargin = new Map();
+  buckets.forEach((rowBucket, rk)=>{
+    const merged = emptyAgg();
+    rowBucket.forEach((cellArr, ck)=>{ if(colMap.has(ck)) cellArr.forEach((agg,vi)=> mergeAggInto(merged[vi], agg)); });
+    rowMargin.set(rk, merged);
+  });
+  const colMargin = new Map();
+  colMap.forEach((_, ck)=>{
+    const merged = emptyAgg();
+    buckets.forEach(rowBucket=>{ const cellArr = rowBucket.get(ck); if(cellArr) cellArr.forEach((agg,vi)=> mergeAggInto(merged[vi], agg)); });
+    colMargin.set(ck, merged);
+  });
+  const grandMerge = emptyAgg();
+  rowMargin.forEach(merged=> merged.forEach((agg,vi)=> mergeAggInto(grandMerge[vi], agg)));
+
+  const rowTotalFor = (rk,vi) => aggToValue(rk==='__grand__' ? grandMerge[vi] : (rowMargin.get(rk)||emptyAgg())[vi], pivotValues[vi].agg);
+  const colTotalFor = (ck,vi) => aggToValue(ck==='__grand__' ? grandMerge[vi] : (colMargin.get(ck)||emptyAgg())[vi], pivotValues[vi].agg);
+  const grandTotalFor = (vi) => aggToValue(grandMerge[vi], pivotValues[vi].agg);
+
+  // Sort rows / columns using the first field's Order + Sort by (matches the
+  // common single-field case shown in the editor; extra fields still group
+  // the data, they just don't add secondary sort keys).
+  let rowKeys = [...rowMap.keys()];
+  const rowSortField = pivotRows[0];
+  if(rowSortField){
+    const dir = rowSortField.order==='desc' ? -1 : 1;
+    if(rowSortField.sortBy==='self'){
+      rowKeys.sort((a,b)=> compareLabels(rowMap.get(a)[0], rowMap.get(b)[0], rowSortField.type)*dir);
+    } else {
+      const vi = pivotValues.findIndex(v=>String(v._id)===String(rowSortField.sortBy));
+      rowKeys = vi<0 ? rowKeys.sort((a,b)=>compareLabels(rowMap.get(a)[0],rowMap.get(b)[0],rowSortField.type)*dir)
+        : rowKeys.sort((a,b)=> (rowTotalFor(a,vi)-rowTotalFor(b,vi))*dir);
+    }
+  } else {
+    rowKeys.sort((a,b)=> a.localeCompare(b));
+  }
+  let colKeys = [...colMap.keys()];
+  const colSortField = pivotCols[0];
+  if(colSortField){
+    const dir = colSortField.order==='desc' ? -1 : 1;
+    if(colSortField.sortBy==='self'){
+      colKeys.sort((a,b)=> compareLabels(colMap.get(a), colMap.get(b), colSortField.type)*dir);
+    } else {
+      const vi = pivotValues.findIndex(v=>String(v._id)===String(colSortField.sortBy));
+      colKeys = vi<0 ? colKeys.sort((a,b)=>compareLabels(colMap.get(a),colMap.get(b),colSortField.type)*dir)
+        : colKeys.sort((a,b)=> (colTotalFor(a,vi)-colTotalFor(b,vi))*dir);
+    }
+  } else {
+    colKeys.sort((a,b)=> a.localeCompare(b));
+  }
+
+  const showGrandTotalRow = pivotRows.length>0 && pivotRows.every(f=>f.showTotals!==false);
+  const showGrandTotalCol = pivotCols.length>0 && pivotCols.every(f=>f.showTotals!==false);
+  const singleValue = pivotValues.length===1;
+
+  // Headers: one per (column group × value field), plus a trailing "Grand Total" group if enabled.
+  const headers = [];
+  colKeys.forEach(ck=>{
+    const label = colMap.get(ck);
+    pivotValues.forEach((vf,vi)=>{
+      const valueLabel = `${AGG_LABELS[vf.agg]} of ${vf.label}`;
+      const text = label ? (singleValue ? label : `${valueLabel} - ${label}`) : valueLabel;
+      headers.push({ colKey:ck, valIdx:vi, text, isGrandCol:false });
+    });
+  });
+  if(showGrandTotalCol){
+    pivotValues.forEach((vf,vi)=>{
+      headers.push({ colKey:'__grand__', valIdx:vi, text: singleValue ? 'Grand Total' : `Grand Total (${vf.label})`, isGrandCol:true });
+    });
+  }
+
+  function buildCell(rk, ck, vi){
+    const vf = pivotValues[vi];
+    let raw;
+    if(rk==='__grand__' && ck==='__grand__') raw = grandTotalFor(vi);
+    else if(rk==='__grand__') raw = colTotalFor(ck, vi);
+    else if(ck==='__grand__') raw = rowTotalFor(rk, vi);
+    else {
+      const cellArr = buckets.get(rk) && buckets.get(rk).get(ck);
+      raw = cellArr ? aggToValue(cellArr[vi], vf.agg) : 0;
+    }
+    const ctx = { rowTotal: rowTotalFor(rk,vi), colTotal: colTotalFor(ck,vi), grandTotal: grandTotalFor(vi) };
+    return { value: formatShowAs(raw, vf, ctx), isGrandRow: rk==='__grand__', isGrandCol: ck==='__grand__' };
+  }
+
+  const rows = rowKeys.map(rk=>({
+    rowLabel: rowMap.get(rk),
+    cells: headers.map(h=> buildCell(rk, h.colKey, h.valIdx))
+  }));
+  if(showGrandTotalRow){
+    rows.push({
+      rowLabel: pivotRows.map((f,i)=> i===0 ? 'Grand Total' : ''),
+      cells: headers.map(h=> buildCell('__grand__', h.colKey, h.valIdx)),
+      isGrandTotalRow: true
+    });
+  }
+
+  pivotResult = { rowFieldLabels: pivotRows.map(f=>f.label), headers, rows, colsTruncated };
+}
+
+function resetPivotResult(){
+  pivotHasRun = false; pivotResult = null; pivotCurPage = 1;
+  renderPivotResults();
+}
+
+function runPivotNow(){
+  if(pivotRows.length===0 || pivotCols.length===0 || pivotValues.length===0){
+    pivotHasRun = false; pivotResult = null; pivotCurPage = 1;
+    renderPivotResults();
+    showToast('error','Add a field to Rows, Columns and Values before running');
+    return;
+  }
+  computePivotResult();
+  pivotHasRun = true;
+  pivotCurPage = 1;
+  renderPivotResults();
+}
+
+document.getElementById('btnRunPivot').addEventListener('click', runPivotNow);
+
+document.getElementById('btnClearPivot').addEventListener('click', ()=>{
+  if(pivotRows.length===0 && pivotCols.length===0 && pivotValues.length===0 && pivotFilters.length===0){
+    showToast('info','The pivot table is already empty');
+    return;
+  }
+  pivotRows = []; pivotCols = []; pivotValues = []; pivotFilters = [];
+  pivotHasRun = false; pivotResult = null; pivotCurPage = 1;
+  refreshPivotEditor();
+  renderPivotResults();
+  showToast('success','Pivot table cleared');
+});
+
+/* ---------------- Pivot results panel ---------------- */
+function pivotToolbarMarkup(hasResult){
+  const exportRow = hasResult ? `
+    <button class="export-btn" id="pivotBtnExportCsv" title="Export data as CSV file">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      <span class="btn-label">Export CSV</span>
+    </button>
+    <div class="rpp-inline">Rows :
+      <button type="button" class="rpp-trigger" id="pivotRppTrigger">
+        <span class="rpp-trigger-label">${pivotRPP.toLocaleString()}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+    </div>` : '';
+  return `${exportRow}
+    <button class="fs-btn" id="pivotFsBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+      <span class="btn-label">Full Screen</span>
+    </button>
+    <button class="min-btn" id="pivotMinBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v4a2 2 0 0 1-2 2H3M21 9h-4a2 2 0 0 1-2-2V3M3 15h4a2 2 0 0 1 2 2v4M15 21v-4a2 2 0 0 1 2-2h4"/></svg>
+      <span class="btn-label">Minimize Screen</span>
+    </button>`;
+}
+function wirePivotToolbarButtons(){
+  const exportBtn = document.getElementById('pivotBtnExportCsv');
+  if(exportBtn) exportBtn.addEventListener('click', exportPivotCsv);
+  const rppTrig = document.getElementById('pivotRppTrigger');
+  if(rppTrig) attachPivotRppTrigger(rppTrig);
+  const fsBtn = document.getElementById('pivotFsBtn');
+  if(fsBtn) fsBtn.addEventListener('click', ()=>{ document.querySelector('.app').classList.add('fullscreen'); });
+  const minBtn = document.getElementById('pivotMinBtn');
+  if(minBtn) minBtn.addEventListener('click', ()=>{ document.querySelector('.app').classList.remove('fullscreen'); });
+}
+function buildPagerHtml(page, totalPages){
+  let pager = `<button ${page===1?'disabled':''} data-p="${page-1}">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+  </button>`;
+  const pages = [];
+  for(let p=1;p<=totalPages;p++){ if(p<=3 || p>totalPages-3 || Math.abs(p-page)<=1) pages.push(p); }
+  let last=0;
+  pages.forEach(p=>{
+    if(last && p-last>1) pager += `<button disabled>…</button>`;
+    pager += `<button class="${p===page?'cur':''}" data-p="${p}">${p}</button>`;
+    last=p;
+  });
+  pager += `<button ${page===totalPages?'disabled':''} data-p="${page+1}">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+  </button>`;
+  return pager;
+}
+function renderPivotResults(){
+  const scroll = document.getElementById('pivotDataScroll');
+  const footer = document.getElementById('pivotDataFooter');
+  const toolbar = document.getElementById('pivotDataToolbarRow');
+
+  const noResult = !pivotHasRun || !pivotResult || pivotResult.rows.length===0 || pivotResult.headers.length===0;
+  toolbar.innerHTML = pivotToolbarMarkup(!noResult);
+  wirePivotToolbarButtons();
+
+  if(noResult){
+    const msg = (pivotRows.length===0 || pivotCols.length===0 || pivotValues.length===0)
+      ? 'Add a field to Rows, Columns and Values, then click Run'
+      : 'Click Run to build the pivot table';
+    scroll.innerHTML = `<div class="empty-state">${ICONS.table}<div>${msg}</div></div>`;
+    footer.innerHTML = '';
+    return;
+  }
+
+  const { rowFieldLabels, headers, rows, colsTruncated } = pivotResult;
+  const totalCount = rows.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount/pivotRPP));
+  if(pivotCurPage>totalPages) pivotCurPage = totalPages;
+  const startIdx = (pivotCurPage-1)*pivotRPP;
+  const pageRows = rows.slice(startIdx, startIdx+pivotRPP);
+
+  const thead = '<tr>'
+    + rowFieldLabels.map(l=>`<th>${escapeHtml(l)}</th>`).join('')
+    + headers.map(h=>`<th${h.isGrandCol?' class="gt-cell"':''}>${escapeHtml(h.text)}</th>`).join('')
+    + '</tr>';
+  const tbody = pageRows.map(r=>
+    `<tr${r.isGrandTotalRow?' class="gt-row"':''}>`
+    + r.rowLabel.map(v=>`<td>${escapeHtml(v)}</td>`).join('')
+    + r.cells.map(c=>`<td${(c.isGrandRow||c.isGrandCol)?' class="gt-cell"':''}>${escapeHtml(String(c.value))}</td>`).join('')
+    + '</tr>'
+  ).join('');
+
+  scroll.innerHTML = `<table class="dgrid"><thead>${thead}</thead><tbody>${tbody}</tbody></table>`;
+
+  const from = totalCount===0 ? 0 : startIdx+1;
+  const to = Math.min(totalCount, startIdx+pivotRPP);
+  const pager = buildPagerHtml(pivotCurPage, totalPages);
+
+  footer.innerHTML = `
+    <div>Results : ${from}-${to} of ${totalCount.toLocaleString()}${colsTruncated?` • columns capped at ${PIVOT_MAX_COLS}`:''}</div>
+    <div class="footer-right">
+      <div class="footer-rpp">
+        Rows Per Page :
+        <button type="button" class="rpp-trigger" id="pivotFooterRppTrigger">
+          <span class="rpp-trigger-label">${pivotRPP.toLocaleString()}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+      <div class="pager">${pager}</div>
+    </div>`;
+  attachPivotRppTrigger(document.getElementById('pivotFooterRppTrigger'));
+  footer.querySelectorAll('.pager button[data-p]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const p = parseInt(b.dataset.p,10);
+      if(p>=1 && p<=totalPages){ pivotCurPage=p; renderPivotResults(); }
+    });
+  });
+}
+function exportPivotCsv(){
+  const table = document.querySelector('#pivotDataScroll table.dgrid');
+  if(!table){ showToast('info','No data to export yet'); return; }
+  const escapeCsv = (text)=>{ const t = text.replace(/"/g,'""'); return /[",\n]/.test(t) ? `"${t}"` : t; };
+  const csvRows = [...table.querySelectorAll('tr')].map(tr=> [...tr.children].map(cell=> escapeCsv(cell.textContent)).join(','));
+  const blob = new Blob([csvRows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'pivot_export.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('success','CSV exported successfully');
+}
+
+/* Rows-per-page control for the pivot results panel — kept independent
+   from the Visual Query data tab's version so the two modes never interfere. */
+let pivotRppClickTimer = null;
+let pivotOpenRppMenu = null;
+function attachPivotRppTrigger(el){
+  if(!el) return;
+  el.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    if(el.classList.contains('editing')) return;
+    if(pivotRppClickTimer){ clearTimeout(pivotRppClickTimer); pivotRppClickTimer=null; return; }
+    pivotRppClickTimer = setTimeout(()=>{ pivotRppClickTimer=null; togglePivotRppMenu(el); }, 220);
+  });
+  el.addEventListener('dblclick', (e)=>{
+    e.stopPropagation();
+    if(pivotRppClickTimer){ clearTimeout(pivotRppClickTimer); pivotRppClickTimer=null; }
+    closePivotRppMenu();
+    startPivotRppEdit(el);
+  });
+}
+function startPivotRppEdit(el){
+  if(el.classList.contains('editing')) return;
+  el.classList.add('editing');
+  const total = pivotResult ? pivotResult.rows.length : 0;
+  el.innerHTML = `<input type="number" class="rpp-edit-input" min="1" max="${total||999999}" value="${pivotRPP}">`;
+  const input = el.querySelector('.rpp-edit-input');
+  input.focus(); input.select();
+  input.addEventListener('click', e=>e.stopPropagation());
+  input.addEventListener('dblclick', e=>e.stopPropagation());
+  const finish = (commit)=>{
+    if(commit){
+      const v = parseInt(input.value,10);
+      if(v && v>0) applyPivotRowsPerPage(total>0 ? Math.min(v,total) : v);
+    }
+    if(document.body.contains(el)){
+      el.classList.remove('editing');
+      el.innerHTML = `<span class="rpp-trigger-label">${pivotRPP.toLocaleString()}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+    }
+  };
+  input.addEventListener('keydown', (e)=>{
+    e.stopPropagation();
+    if(e.key==='Enter') finish(true);
+    else if(e.key==='Escape') finish(false);
+  });
+  input.addEventListener('blur', ()=>finish(true));
+}
+function togglePivotRppMenu(anchorEl){
+  if(pivotOpenRppMenu){ closePivotRppMenu(); return; }
+  const total = pivotResult ? pivotResult.rows.length : 0;
+  const menu = document.createElement('div');
+  menu.className = 'rpp-popover';
+  const presetsHtml = RPP_PRESETS.map(n=>
+    `<button type="button" class="rpp-popover-item ${pivotRPP===n?'sel':''}" data-val="${n}">${n}</button>`
+  ).join('');
+  menu.innerHTML = `
+    ${presetsHtml}
+    <div class="rpp-popover-divider"></div>
+    <button type="button" class="rpp-popover-item ${total>0 && pivotRPP===total?'sel':''}" data-val="${total}">${total.toLocaleString()}</button>
+    <div class="rpp-popover-hint">Double-click the value to type a custom number</div>
+  `;
+  document.body.appendChild(menu);
+  const r = anchorEl.getBoundingClientRect();
+  menu.style.top = (r.bottom+6)+'px';
+  let left = r.left;
+  const maxLeft = window.innerWidth - 200;
+  if(left > maxLeft) left = maxLeft;
+  menu.style.left = Math.max(8,left)+'px';
+  pivotOpenRppMenu = menu;
+
+  menu.querySelectorAll('.rpp-popover-item[data-val]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const v = parseInt(btn.dataset.val, 10);
+      if(!v || v<1) return;
+      applyPivotRowsPerPage(v);
+      closePivotRppMenu();
+    });
+  });
+  setTimeout(()=> document.addEventListener('click', closePivotRppMenuOnce), 0);
+}
+function closePivotRppMenuOnce(){ closePivotRppMenu(); }
+function closePivotRppMenu(){
+  if(pivotOpenRppMenu){ pivotOpenRppMenu.remove(); pivotOpenRppMenu=null; }
+  document.removeEventListener('click', closePivotRppMenuOnce);
+}
+function applyPivotRowsPerPage(v){
+  v = Math.max(1, Math.floor(v));
+  pivotRPP = v;
+  pivotCurPage = 1;
+  renderPivotResults();
+}
+
+
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function openConfirmModal(){
+  const host = document.getElementById('modalHost');
+  host.innerHTML = `
+    <div class="modal-backdrop" id="backdrop">
+      <div class="modal-card">
+        <div class="modal-icon">${ICONS.warn}</div>
+        <div class="modal-title">Clear the entire workspace?</div>
+        <div class="modal-body">All tables and connections (${nodes.length} tables, ${conns.length} connections) will be removed and cannot be recovered.</div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="cancelClear">Cancel</button>
+          <button class="btn btn-danger" id="confirmClear">Clear All</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('cancelClear').addEventListener('click', closeModal);
+  document.getElementById('backdrop').addEventListener('click', (e)=>{ if(e.target.id==='backdrop') closeModal(); });
+  document.getElementById('confirmClear').addEventListener('click', ()=>{
+    nodes = []; conns = []; pushHistory(); render(); closeModal();
+    showToast('info','Workspace cleared successfully');
+  });
+}
+function closeModal(){ document.getElementById('modalHost').innerHTML=''; }
+
+function openRemoveNodeModal(nodeId, tableName){
+  const affected = conns.filter(c=>c.fromNode===nodeId || c.toNode===nodeId).length;
+  const host = document.getElementById('modalHost');
+  host.innerHTML = `
+    <div class="modal-backdrop" id="backdrop2">
+      <div class="modal-card">
+        <div class="modal-icon">${ICONS.warn}</div>
+        <div class="modal-title">Remove table "${tableName}"?</div>
+        <div class="modal-body">This table${affected>0 ? ` and ${affected} related connection(s)` : ''} will be removed from the workspace.</div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="cancelRemoveNode">Cancel</button>
+          <button class="btn btn-danger" id="confirmRemoveNode">Remove</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('cancelRemoveNode').addEventListener('click', closeModal);
+  document.getElementById('backdrop2').addEventListener('click', (e)=>{ if(e.target.id==='backdrop2') closeModal(); });
+  document.getElementById('confirmRemoveNode').addEventListener('click', ()=>{
+    removeNode(nodeId); render(); closeModal();
+    showToast('info', `Removed table "${tableName}" from the workspace`);
+  });
+}
+
+function openDeleteViewModal(viewId, viewTitle){
+  const host = document.getElementById('modalHost');
+  host.innerHTML = `
+    <div class="modal-backdrop" id="backdrop3">
+      <div class="modal-card">
+        <div class="modal-icon">${ICONS.warn}</div>
+        <div class="modal-title">Delete saved query "${escapeHtml(viewTitle)}"?</div>
+        <div class="modal-body">This saved query and its Visual Query / Pivot views will be permanently deleted and cannot be recovered.</div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="cancelDeleteView">Cancel</button>
+          <button class="btn btn-danger" id="confirmDeleteView">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('cancelDeleteView').addEventListener('click', closeModal);
+  document.getElementById('backdrop3').addEventListener('click', (e)=>{ if(e.target.id==='backdrop3') closeModal(); });
+  document.getElementById('confirmDeleteView').addEventListener('click', ()=>{
+    savedViews = savedViews.filter(x=>x.id!==viewId);
+    renderViewList();
+    closeModal();
+    showToast('info', `Deleted view "${viewTitle}"`);
+  });
+}
+
+const SQ_TYPE_OPTIONS = ['สตริง (String)','จำนวนเต็ม (Integer)','ทศนิยม (Float)','บูลีน (Boolean)','วันที่ (Date)','วันเวลา (Timestamp)'];
+function sqTypeLabel(t){
+  switch(t){
+    case 'int64': return 'จำนวนเต็ม (Integer)'; case 'float64': return 'ทศนิยม (Float)'; case 'timestamp': return 'วันที่ (Date)'; default: return 'สตริง (String)';
+  }
+}
+const SQ_CATEGORY_OPTIONS = [
+  'เกษตรกรรม','การศึกษา','การท่องเที่ยวและกีฬา','การเมืองและการปกครอง',
+  'ความมั่นคงและการต่างประเทศ','คมนาคมและโลจิสติกส์','ทรัพยากรธรรมชาติและสิ่งแวดล้อม',
+  'เทคโนโลยีสารสนเทศและการสื่อสาร','เศรษฐกิจ การเงิน และอุตสาหกรรม','ประชากรและสังคม',
+  'พลังงาน','สาธารณสุข','กฎหมาย ศาล และอาชญากรรม','การบริหารภาครัฐ'
+];
+const SQ_FREQ_OPTIONS = ['รายวัน (Daily)','รายสัปดาห์ (Weekly)','รายเดือน (Monthly)','รายไตรมาส (Quarterly)','รายปี (Yearly)','ไม่สม่ำเสมอ (Irregular)','แบบเรียลไทม์ (Real-time)'];
+const SQ_VISIBILITY_OPTIONS = ['ข้อมูลสาธารณะ (Public)','ภายในหน่วยงาน (Internal)','จำกัดสิทธิ์การเข้าถึง (Restricted)','ข้อมูลส่วนบุคคล (Private)'];
+const SQ_LICENSE_OPTIONS = ['Open Government License (OGL)','Creative Commons Attribution 4.0 (CC-BY 4.0)','Creative Commons Zero (CC0)','สงวนสิทธิ์ทั้งหมด (All Rights Reserved)','อื่นๆ (Other)'];
+
+let sqState = null; let sqActiveTab = 'details';
+
+function openSaveQueryModal(){
+  const cols = collectSelectedColumns();
+  sqState = {
+    title: '', description: '', publisher: '', category: '', keywordsList: [], keywordDraft: '',
+    updateFrequency: '', visibility: SQ_VISIBILITY_OPTIONS[0], license: SQ_LICENSE_OPTIONS[0],
+    dictOverview: '', terms: [ {term:'', definition:''} ],
+    columns: cols.length ? cols.map(c=>({ name: `${c.table}.${c.col}`, type: sqTypeLabel(c.type), nullable: false, description: '' })) : [ {name:'', type:SQ_TYPE_OPTIONS[0], nullable:false, description:''} ]
+  };
+  sqActiveTab = 'details'; renderSaveQueryModal();
+}
+function closeSaveQueryModal(){ document.getElementById('modalHost').innerHTML = ''; sqState = null; }
+function sqValid(){
+  return !!(sqState && sqState.title.trim() && sqState.description.trim() && sqState.publisher.trim() && sqState.category && sqState.keywordsList.length>0 && sqState.updateFrequency && sqState.visibility && sqState.license);
+}
+function sqSyncSaveBtn(){ const btn = document.getElementById('sqSaveBtn'); if(btn) btn.disabled = !sqValid(); }
+
+function renderSaveQueryModal(){
+  const host = document.getElementById('modalHost');
+  if(!sqState) return;
+  const tabsHtml = `
+    <button class="sq-tab ${sqActiveTab==='details'?'active':''}" data-sqtab="details">Dataset Details</button>
+    <button class="sq-tab ${sqActiveTab==='dict'?'active':''}" data-sqtab="dict">Data Dictionary</button>
+    <button class="sq-tab ${sqActiveTab==='cols'?'active':''}" data-sqtab="cols">Column Metadata</button>
+  `;
+  let bodyHtml = '';
+  if(sqActiveTab==='details'){
+    bodyHtml = `
+      <div class="sq-desc">Fill in the dataset metadata according to the DGA (Digital Government Development Agency) standard fields.</div>
+      <div class="sq-field">
+        <label class="sq-label"><span class="req">*</span>Title :</label>
+        <input type="text" class="sq-input" id="sqTitle" placeholder="เช่น รายชื่อโรงพยาบาลรัฐและสถานพยาบาลทั่วประเทศ" value="${escapeAttr(sqState.title)}">
+      </div>
+      <div class="sq-field">
+        <label class="sq-label"><span class="req">*</span>Description :</label>
+        <textarea class="sq-textarea" id="sqDescription" style="min-height:80px" placeholder="เช่น ข้อมูลพิกัดที่ตั้ง เบอร์ติดต่อ และจำนวนเตียง ของโรงพยาบาลรัฐทั่วประเทศ">${escapeHtml(sqState.description)}</textarea>
+      </div>
+      <div class="sq-field">
+        <label class="sq-label"><span class="req">*</span>Publisher :</label>
+        <input type="text" class="sq-input" id="sqPublisher" placeholder="เช่น สำนักงานปลัดกระทรวงสาธารณสุข" value="${escapeAttr(sqState.publisher)}">
+      </div>
+      <div class="sq-field">
+        <label class="sq-label"><span class="req">*</span>Category :</label>
+        <select class="sq-input" id="sqCategory">
+          <option value="" ${sqState.category===''?'selected':''} disabled>-- เลือกหมวดหมู่ --</option>
+          ${SQ_CATEGORY_OPTIONS.map(o=>`<option value="${escapeAttr(o)}" ${o===sqState.category?'selected':''}>${escapeHtml(o)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="sq-field">
+        <label class="sq-label"><span class="req">*</span>Tags / Keywords :</label>
+        <div class="sq-keywords-box" id="sqKwBox">${sqState.keywordsList.map((k,i)=>`<span class="kw-chip">${escapeHtml(k)}<button type="button" data-kwdel="${i}" title="Remove">${ICONS.close}</button></span>`).join('')}</div>
+        <input type="text" class="sq-input" id="sqKwInput" placeholder="พิมพ์คำสำคัญแล้วกด Enter เพื่อเพิ่ม เช่น โรงพยาบาล, เตียงผู้ป่วย" value="${escapeAttr(sqState.keywordDraft)}">
+      </div>
+      <div class="sq-field">
+        <label class="sq-label"><span class="req">*</span>Update Frequency :</label>
+        <select class="sq-input" id="sqUpdateFreq">
+          <option value="" ${sqState.updateFrequency===''?'selected':''} disabled>-- เลือกความถี่ --</option>
+          ${SQ_FREQ_OPTIONS.map(o=>`<option value="${escapeAttr(o)}" ${o===sqState.updateFrequency?'selected':''}>${escapeHtml(o)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="sq-field">
+        <label class="sq-label"><span class="req">*</span>Visibility :</label>
+        <select class="sq-input" id="sqVisibility">
+          ${SQ_VISIBILITY_OPTIONS.map(o=>`<option value="${escapeAttr(o)}" ${o===sqState.visibility?'selected':''}>${escapeHtml(o)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="sq-field" style="margin-bottom:4px;">
+        <label class="sq-label"><span class="req">*</span>License :</label>
+        <select class="sq-input" id="sqLicense">
+          ${SQ_LICENSE_OPTIONS.map(o=>`<option value="${escapeAttr(o)}" ${o===sqState.license?'selected':''}>${escapeHtml(o)}</option>`).join('')}
+        </select>
+      </div>
+    `;
+  } else if(sqActiveTab==='dict'){
+    bodyHtml = `
+      <div class="sq-desc">Define business terms, formulas, and context associated with this dataset.</div>
+      <div class="sq-field">
+        <label class="sq-label" style="font-weight:800;">Dictionary Overview :</label>
+        <textarea class="sq-textarea" id="sqDictOverview" style="min-height:64px" placeholder="คำอธิบายภาพรวมของคำศัพท์ที่ใช้ในชุดข้อมูลนี้...">${escapeHtml(sqState.dictOverview)}</textarea>
+      </div>
+      <div class="sq-table-wrap">
+        <table class="sq-table">
+          <colgroup><col style="width:34%"><col><col style="width:48px"></colgroup>
+          <thead><tr><th>Business Term</th><th>Definition</th><th></th></tr></thead>
+          <tbody>
+            ${sqState.terms.map((t,i)=>`
+              <tr>
+                <td><input class="sq-cell-input" data-term-field="term" data-idx="${i}" placeholder="เช่น ผู้ใช้งานที่ใช้งานอยู่ (Active User)" value="${escapeAttr(t.term)}"></td>
+                <td><input class="sq-cell-input" data-term-field="definition" data-idx="${i}" placeholder="เช่น ผู้ใช้งานที่เข้าสู่ระบบภายใน 30 วันที่ผ่านมา" value="${escapeAttr(t.definition)}"></td>
+                <td><button class="sq-row-del" data-term-del="${i}" title="Delete this row">${ICONS.trash}</button></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <button class="sq-add-link" id="sqAddTerm">${ICONS.plus} Add Term</button>
+    `;
+  } else {
+    bodyHtml = `
+      <div class="sq-desc">Map and define the metadata for the specific data columns generated by this query.</div>
+      <div class="sq-table-wrap">
+        <table class="sq-table">
+          <colgroup><col style="width:26%"><col style="width:16%"><col style="width:14%"><col><col style="width:48px"></colgroup>
+          <thead><tr><th>Column Name</th><th>Data Type</th><th style="text-align:center">Nullable</th><th>Description</th><th></th></tr></thead>
+          <tbody>
+            ${sqState.columns.map((c,i)=>`
+              <tr>
+                <td><input class="sq-cell-input" data-col-field="name" data-idx="${i}" placeholder="เช่น user_id" value="${escapeAttr(c.name)}"></td>
+                <td>
+                  <select class="sq-cell-input" data-col-field="type" data-idx="${i}">
+                    ${SQ_TYPE_OPTIONS.map(o=>`<option value="${escapeAttr(o)}" ${o===c.type?'selected':''}>${escapeHtml(o)}</option>`).join('')}
+                  </select>
+                </td>
+                <td style="text-align:center"><span class="sq-check ${c.nullable?'checked':''}" data-col-null="${i}">${ICONS.check}</span></td>
+                <td><input class="sq-cell-input" data-col-field="description" data-idx="${i}" placeholder="คำอธิบายของคอลัมน์นี้..." value="${escapeAttr(c.description)}"></td>
+                <td><button class="sq-row-del" data-col-del="${i}" title="Delete this row">${ICONS.trash}</button></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <button class="sq-add-link" id="sqAddCol">${ICONS.plus} Add Column</button>
+    `;
+  }
+
+  host.innerHTML = `
+    <div class="modal-backdrop-lg" id="sqBackdrop">
+      <div class="sq-modal">
+        <div class="sq-header">
+          <div class="sq-title">Save Query</div>
+          <div class="sq-tabs">${tabsHtml}</div>
+        </div>
+        <div class="sq-body">${bodyHtml}</div>
+        <div class="sq-footer">
+          <button class="sq-btn sq-btn-cancel" id="sqCancelBtn">${ICONS.close} Cancel</button>
+          <button class="sq-btn sq-btn-save" id="sqSaveBtn" ${sqValid()?'':'disabled'}>${ICONS.check} Save</button>
+        </div>
+      </div>
+    </div>`;
+  wireSaveQueryModal();
+}
+
+function wireSaveQueryModal(){
+  document.querySelectorAll('.sq-tab').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ sqActiveTab = btn.dataset.sqtab; renderSaveQueryModal(); });
+  });
+  document.getElementById('sqBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='sqBackdrop') closeSaveQueryModal(); });
+  document.getElementById('sqCancelBtn').addEventListener('click', closeSaveQueryModal);
+  document.getElementById('sqSaveBtn').addEventListener('click', ()=>{
+    if(!sqValid()) return;
+    const title = sqState.title; closeSaveQueryModal(); addSavedView(title);
+    showToast('success', `Query "${title}" saved successfully and a view has been created`);
+  });
+
+  if(sqActiveTab==='details'){
+    const titleEl = document.getElementById('sqTitle'); titleEl.addEventListener('input', ()=>{ sqState.title = titleEl.value; sqSyncSaveBtn(); });
+    const descEl = document.getElementById('sqDescription'); descEl.addEventListener('input', ()=>{ sqState.description = descEl.value; sqSyncSaveBtn(); });
+    const pubEl = document.getElementById('sqPublisher'); pubEl.addEventListener('input', ()=>{ sqState.publisher = pubEl.value; sqSyncSaveBtn(); });
+    const catEl = document.getElementById('sqCategory'); catEl.addEventListener('change', ()=>{ sqState.category = catEl.value; sqSyncSaveBtn(); });
+    const kwInput = document.getElementById('sqKwInput'); kwInput.addEventListener('input', ()=>{ sqState.keywordDraft = kwInput.value; });
+    kwInput.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){
+        e.preventDefault(); const v = kwInput.value.trim();
+        if(v && !sqState.keywordsList.includes(v)){ sqState.keywordsList.push(v); sqState.keywordDraft = ''; renderSaveQueryModal(); }
+      }
+    });
+    document.querySelectorAll('[data-kwdel]').forEach(b=>{
+      b.addEventListener('click', ()=>{ sqState.keywordsList.splice(+b.dataset.kwdel, 1); renderSaveQueryModal(); });
+    });
+    const freqEl = document.getElementById('sqUpdateFreq'); freqEl.addEventListener('change', ()=>{ sqState.updateFrequency = freqEl.value; sqSyncSaveBtn(); });
+    const visEl = document.getElementById('sqVisibility'); visEl.addEventListener('change', ()=>{ sqState.visibility = visEl.value; sqSyncSaveBtn(); });
+    const licEl = document.getElementById('sqLicense'); licEl.addEventListener('change', ()=>{ sqState.license = licEl.value; sqSyncSaveBtn(); });
+  }
+
+  if(sqActiveTab==='dict'){
+    const ov = document.getElementById('sqDictOverview'); ov.addEventListener('input', ()=>{ sqState.dictOverview = ov.value; });
+    document.querySelectorAll('[data-term-field]').forEach(inp=>{
+      inp.addEventListener('input', ()=>{ sqState.terms[+inp.dataset.idx][inp.dataset.termField] = inp.value; });
+    });
+    document.querySelectorAll('[data-term-del]').forEach(b=>{
+      b.addEventListener('click', ()=>{ sqState.terms.splice(+b.dataset.termDel, 1); renderSaveQueryModal(); });
+    });
+    document.getElementById('sqAddTerm').addEventListener('click', ()=>{ sqState.terms.push({term:'', definition:''}); renderSaveQueryModal(); });
+  }
+
+  if(sqActiveTab==='cols'){
+    document.querySelectorAll('[data-col-field]').forEach(inp=>{
+      const ev = inp.tagName==='SELECT' ? 'change' : 'input';
+      inp.addEventListener(ev, ()=>{ sqState.columns[+inp.dataset.idx][inp.dataset.colField] = inp.value; });
+    });
+    document.querySelectorAll('[data-col-null]').forEach(chk=>{
+      chk.addEventListener('click', ()=>{
+        const idx = +chk.dataset.colNull; sqState.columns[idx].nullable = !sqState.columns[idx].nullable;
+        chk.classList.toggle('checked', sqState.columns[idx].nullable);
+      });
+    });
+    document.querySelectorAll('[data-col-del]').forEach(b=>{
+      b.addEventListener('click', ()=>{ sqState.columns.splice(+b.dataset.colDel, 1); renderSaveQueryModal(); });
+    });
+    document.getElementById('sqAddCol').addEventListener('click', ()=>{ sqState.columns.push({name:'', type:SQ_TYPE_OPTIONS[0], nullable:false, description:''}); renderSaveQueryModal(); });
+  }
+}
+
+function showToast(type, msg){
+  const host = document.getElementById('toastHost');
+  const t = document.createElement('div'); t.className = 'toast '+type;
+  t.innerHTML = (type==='success'?ICONS.check.replace('stroke-width="3"','stroke="currentColor" stroke-width="3"'):ICONS.info)+`<span>${msg}</span>`;
+  host.appendChild(t);
+  setTimeout(()=>{ t.style.transition='opacity .25s'; t.style.opacity='0'; setTimeout(()=>t.remove(),250); }, 2600);
+}
+
+document.getElementById('btnExportCsv').addEventListener('click', ()=>{
+  const table = document.querySelector('#dataScroll table.dgrid');
+  if(!table){ showToast('info','No data to export yet'); return; }
+  const escapeCsv = (text)=>{ const t = text.replace(/"/g,'""'); return /[",\n]/.test(t) ? `"${t}"` : t; };
+  const csvRows = [...table.querySelectorAll('tr')].map(tr=> [...tr.children].map(cell=> escapeCsv(cell.textContent)).join(',') );
+  const blob = new Blob([csvRows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'export.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('success','CSV exported successfully');
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+buildSidebar();
+seedInitialState();
+initCanvasDropZone();
+applyZoom();
+render();
+setTab('data');
+</script>
+</body>
+</html>
