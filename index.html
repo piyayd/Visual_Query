@@ -184,6 +184,13 @@ button{font-family:inherit;}
 }
 .toggle-switch.on{ background:var(--blue-500); }
 .toggle-switch.on .toggle-knob{ left:16px; }
+.rest-api-controls{ display:flex; align-items:center; gap:6px; }
+.rest-icon-btn{
+  display:flex; align-items:center; justify-content:center; width:20px;height:20px; padding:0;
+  border:none; background:transparent; color:var(--blue-500); cursor:pointer; border-radius:var(--radius-s);
+}
+.rest-icon-btn svg{ width:15px;height:15px; }
+.rest-icon-btn:hover{ background:var(--blue-50); }
 .view-delete-btn{
   display:flex; align-items:center; gap:8px; width:calc(100% - 16px); margin:4px 8px 4px 48px;
   padding:6px 10px; border:none; background:transparent; border-radius:var(--radius-s);
@@ -633,6 +640,58 @@ select.sq-cell-input{ appearance:none; -webkit-appearance:none; cursor:pointer;
 .sq-btn-cancel{ background:#fff; border-color:var(--gray-300); color:var(--fg-primary); }
 .sq-btn-cancel:hover{ border-color:var(--gray-500); }
 
+/* ---------------- Share View modal (REST API filter setup) ---------------- */
+.sv-modal{
+  width:720px; max-width:100%; max-height:88vh; background:#fff; border-radius:var(--radius-l);
+  box-shadow:var(--shadow-xl); display:flex; flex-direction:column; overflow:hidden; font-family:var(--font-ui);
+}
+.sv-header{ padding:22px 26px 4px; flex:0 0 auto; }
+.sv-title{ font-size:19px; font-weight:800; color:var(--fg-primary); margin-bottom:6px; }
+.sv-sub{ font-size:13px; color:var(--fg-secondary); margin-bottom:14px; }
+.sv-sub b{ color:var(--fg-brand); font-weight:700; }
+.sv-body{ display:flex; gap:16px; padding:0 26px 18px; flex:1 1 auto; min-height:0; }
+.sv-col{ flex:1 1 50%; min-width:0; display:flex; flex-direction:column; }
+.sv-col-head{ font-size:12.5px; font-weight:700; color:var(--fg-primary); margin-bottom:8px; }
+.sv-col-hint{ font-size:11.5px; color:var(--gray-600); margin-bottom:8px; }
+.sv-list{ border:1px solid var(--gray-200b); border-radius:var(--radius-s); flex:1 1 auto; overflow-y:auto; max-height:320px; }
+.sv-item{
+  display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 12px;
+  border-bottom:1px solid var(--bg-muted); font-size:13px; cursor:pointer;
+}
+.sv-item:last-child{ border-bottom:none; }
+.sv-item:hover{ background:var(--bg-subtle); }
+.sv-item.disabled{ opacity:.4; cursor:not-allowed; }
+.sv-item-type{ font-size:11px; color:var(--gray-600); font-style:italic; }
+.sv-chosen-item{
+  display:flex; align-items:center; gap:8px; padding:8px 10px; margin:6px; border-radius:var(--radius-s);
+  background:var(--blue-50); font-size:12.5px; color:var(--fg-primary);
+}
+.sv-chosen-item button{ border:none; background:transparent; color:var(--c-error); cursor:pointer; display:flex; padding:0; }
+.sv-chosen-item button svg{ width:13px;height:13px; }
+.sv-chosen-tag{ font-size:10px; font-weight:700; color:var(--fg-brand); text-transform:uppercase; margin-left:auto; }
+.sv-footer{ padding:14px 26px 22px; border-top:1px solid var(--gray-200b); display:flex; gap:10px; justify-content:flex-start; flex:0 0 auto; }
+
+/* ---------------- API Documentation full page ---------------- */
+.fullpage-overlay{ position:fixed; inset:0; background:#fff; z-index:200; display:flex; flex-direction:column; }
+.api-modal{
+  width:100%; height:100%; background:#fff; display:flex; flex-direction:column; overflow:hidden; font-family:var(--font-ui);
+}
+.api-topbar{ background:#2b2b2b; color:#fff; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; flex:0 0 auto; }
+.api-topbar-title{ font-size:14px; font-weight:600; opacity:.85; }
+.api-crumb{ background:#c33; color:#fff; font-size:11.5px; padding:7px 32px; display:flex; gap:6px; flex:0 0 auto; }
+.api-crumb span{ opacity:.55; }
+.api-body{ padding:24px 40px 40px; overflow-y:auto; flex:1 1 auto; width:100%; }
+.api-h1{ font-size:22px; font-weight:800; margin-bottom:14px; color:#222; }
+.api-endpoint-box{ background:#f7f7f7; border:1px solid #e2e2e2; border-radius:6px; padding:10px 14px; font-family:monospace; font-size:12.5px; margin-bottom:16px; }
+.api-endpoint-box b{ color:#2b6cb0; }
+.api-code{
+  background:#1e1e1e; color:#d4d4d4; border-radius:6px; padding:14px 16px; font-family:monospace; font-size:11.5px;
+  line-height:1.6; overflow-x:auto; white-space:pre;
+}
+.api-code .k{ color:#9cdcfe; } .api-code .s{ color:#ce9178; } .api-code .n{ color:#b5cea8; } .api-code .c{ color:#6a9955; }
+.api-section-label{ font-size:13px; font-weight:700; color:var(--fg-primary); margin:18px 0 8px; }
+.api-curl{ background:#1e1e1e; color:#9cdcfe; border-radius:6px; padding:12px 14px; font-family:monospace; font-size:11.5px; line-height:1.6; overflow-x:auto; white-space:pre-wrap; word-break:break-all; }
+
 /* ---------------- Column filter popover ---------------- */
 #filterPopoverHost{ position:fixed; inset:0; pointer-events:none; z-index:170; }
 .filt-popover{
@@ -1052,6 +1111,7 @@ table.dgrid th.gt-cell{ background:var(--blue-600); }
 
 <div id="toastHost"></div>
 <div id="modalHost"></div>
+<div id="fullPageHost"></div>
 <div id="filterPopoverHost"></div>
 
 <script>
@@ -1105,7 +1165,9 @@ const ICONS = {
   minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>',
   expand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>',
   collapse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v4a2 2 0 0 1-2 2H3M21 9h-4a2 2 0 0 1-2-2V3M3 15h4a2 2 0 0 1 2 2v4M15 21v-4a2 2 0 0 1 2-2h4"/></svg>',
-  funnel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>'
+  funnel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>',
+  cloudUp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>'
 };
 
 /* ============================================================
@@ -1268,7 +1330,7 @@ function buildSidebar(){
   sb.innerHTML = `
     <div class="tree-item folder" id="rootAll">${ICONS.chev}${ICONS.folder} All</div>
     <div class="tree-children" id="rootChildren">
-      <div class="tree-item folder" id="martToggle" style="padding-left:24px">${ICONS.chev}${ICONS.folder} data-mart</div>
+      <div class="tree-item folder" id="martToggle" style="padding-left:24px">${ICONS.chev}${ICONS.folder} data-product</div>
       <div class="tree-children" id="martList"></div>
       <div class="tree-item folder" id="viewToggle" style="padding-left:24px">${ICONS.chev}${ICONS.folder} view</div>
       <div class="tree-children collapsed" id="viewList"></div>
@@ -1305,9 +1367,11 @@ function buildSidebar(){
   renderViewList();
 }
 
-function addSavedView(title){
+function addSavedView(title, columns){
   const id = 'view'+(++viewSeq);
-  savedViews.push({ id, title, mode:'visual', restApi:false, ckan:false, expanded:true });
+  savedViews.push({ id, title, mode:'visual', restApi:false, ckan:false, expanded:true,
+    apiColumns: (columns||[]).map(c=>c.name).filter(Boolean),
+    apiFilterCols: [], apiShared:false });
   renderViewList();
   document.getElementById('viewToggle').classList.remove('collapsed');
   document.getElementById('viewList').classList.remove('collapsed');
@@ -1327,7 +1391,13 @@ function renderViewList(){
       <div class="view-divider"></div>
       <div class="view-toggle-row">
         <span>REST API</span>
-        <button class="toggle-switch ${v.restApi?'on':''}" title="Toggle REST API publishing" data-view-toggle-rest="${v.id}"><span class="toggle-knob"></span></button>
+        <div class="rest-api-controls">
+          ${v.restApi?`
+          <button type="button" class="rest-icon-btn" title="API Documentation" data-view-api-doc="${v.id}">${ICONS.book}</button>
+          <button type="button" class="rest-icon-btn" title="Share / Filter Settings" data-view-api-share="${v.id}">${ICONS.cloudUp}</button>
+          `:''}
+          <button class="toggle-switch ${v.restApi?'on':''}" title="Toggle REST API publishing" data-view-toggle-rest="${v.id}"><span class="toggle-knob"></span></button>
+        </div>
       </div>
       <div class="view-toggle-row">
         <span>CKAN</span>
@@ -1362,6 +1432,12 @@ function renderViewList(){
       renderViewList();
       showToast(v.restApi?'success':'info', `REST API ${v.restApi?'enabled':'disabled'} for "${v.title}"`);
     });
+  });
+  list.querySelectorAll('[data-view-api-share]').forEach(el=>{
+    el.addEventListener('click', (e)=>{ e.stopPropagation(); openShareViewModal(el.dataset.viewApiShare); });
+  });
+  list.querySelectorAll('[data-view-api-doc]').forEach(el=>{
+    el.addEventListener('click', (e)=>{ e.stopPropagation(); openApiDocModal(el.dataset.viewApiDoc); });
   });
   list.querySelectorAll('[data-view-toggle-ckan]').forEach(el=>{
     el.addEventListener('click', (e)=>{
@@ -3350,6 +3426,135 @@ function openDeleteViewModal(viewId, viewTitle){
   });
 }
 
+/* ---------------- Share View modal (REST API filter setup, step 4) ---------------- */
+let svState = null;
+function svColType(name){
+  const [table, col] = name.split('.');
+  const def = SCHEMA[table] && SCHEMA[table].cols.find(c=>c[0]===col);
+  return def ? def[1] : 'string';
+}
+function openShareViewModal(viewId){
+  const v = savedViews.find(x=>x.id===viewId);
+  if(!v) return;
+  const pool = v.apiColumns.length ? v.apiColumns : ['fact_export.tax_no','fact_export.export_year','dim_area.alpha2_code','dim_area.country_name_th','dim_area.country_name_en'];
+  svState = { viewId, pool, chosen: (v.apiFilterCols||[]).slice() };
+  renderShareViewModal();
+}
+function closeShareViewModal(){ document.getElementById('modalHost').innerHTML=''; svState=null; }
+function renderShareViewModal(){
+  const host = document.getElementById('modalHost');
+  if(!svState) return;
+  const v = savedViews.find(x=>x.id===svState.viewId);
+  const host_available = svState.pool.filter(c=>!svState.chosen.includes(c));
+  host.innerHTML = `
+    <div class="modal-backdrop-lg" id="svBackdrop">
+      <div class="sv-modal">
+        <div class="sv-header">
+          <div class="sv-title">Share View</div>
+          <div class="sv-sub">Please select the columns of <b>${escapeHtml(v.title)}</b> to share to <b>REST API</b></div>
+        </div>
+        <div class="sv-body">
+          <div class="sv-col">
+            <div class="sv-col-head">Available Columns</div>
+            <div class="sv-list" id="svAvailList">
+              ${host_available.length ? host_available.map(c=>`<div class="sv-item" data-sv-add="${escapeAttr(c)}"><span>${escapeHtml(c)}</span><span class="sv-item-type">${svColType(c)}</span></div>`).join('') : '<div class="sv-item disabled">No more columns available</div>'}
+            </div>
+          </div>
+          <div class="sv-col">
+            <div class="sv-col-head">Search Text / Filter By Data Range</div>
+            <div class="sv-col-hint">(Accepting a maximum of 6 columns.) (${svState.chosen.length} / 6)</div>
+            <div class="sv-list" id="svChosenList">
+              ${svState.chosen.length ? svState.chosen.map(c=>`
+                <div class="sv-chosen-item">
+                  <button type="button" data-sv-remove="${escapeAttr(c)}">${ICONS.close}</button>
+                  <span>${escapeHtml(c)}</span>
+                  <span class="sv-chosen-tag">${svColType(c)==='timestamp'?'Date Range':'Search Text'}</span>
+                </div>`).join('') : '<div class="sv-item disabled">No columns selected yet</div>'}
+            </div>
+          </div>
+        </div>
+        <div class="sv-footer">
+          <button class="sq-btn sq-btn-save" id="svShareBtn">${ICONS.check} Share</button>
+          <button class="sq-btn sq-btn-cancel" id="svCancelBtn">${ICONS.close} Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('svCancelBtn').addEventListener('click', closeShareViewModal);
+  document.getElementById('svBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='svBackdrop') closeShareViewModal(); });
+  document.querySelectorAll('[data-sv-add]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(svState.chosen.length>=6) return;
+      svState.chosen.push(el.dataset.svAdd);
+      renderShareViewModal();
+    });
+  });
+  document.querySelectorAll('[data-sv-remove]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      svState.chosen = svState.chosen.filter(c=>c!==el.dataset.svRemove);
+      renderShareViewModal();
+    });
+  });
+  document.getElementById('svShareBtn').addEventListener('click', ()=>{
+    v.apiFilterCols = svState.chosen.slice();
+    v.apiShared = true;
+    renderViewList();
+    closeShareViewModal();
+    showToast('success', `REST API published for "${v.title}" with ${v.apiFilterCols.length} filter column(s)`);
+  });
+}
+
+/* ---------------- API Documentation full page (step 5) ---------------- */
+function openApiDocModal(viewId){
+  const v = savedViews.find(x=>x.id===viewId);
+  if(!v) return;
+  const host = document.getElementById('fullPageHost');
+  const viewName = v.title.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'') || 'view';
+  const cols = v.apiColumns.length ? v.apiColumns : ['fact_export.tax_no','fact_export.export_year','dim_area.alpha2_code'];
+  const exampleRow = cols.map(c=>{
+    const t = svColType(c);
+    const val = t==='int64' ? '2025' : t==='float64' ? '334890' : t==='timestamp' ? '"2025-01-08"' : `"${c.split('.')[1]}_sample"`;
+    return `      <span class="k">"${c}"</span>: <span class="${/^\d/.test(val)?'n':'s'}">${val}</span>`;
+  }).join(',\n');
+  const filterKey = (v.apiFilterCols&&v.apiFilterCols[0]) || cols[0];
+  host.innerHTML = `
+    <div class="fullpage-overlay" id="apiBackdrop">
+      <div class="api-modal">
+        <div class="api-topbar">
+          <span class="api-topbar-title">Django REST framework</span><span style="font-size:12px;opacity:.7">system_admin</span>
+        </div>
+        <div class="api-crumb"><span>Schema /</span><span>Api Root /</span><span>Private Viewset List /</span> Private Viewset Instance</div>
+        <div class="api-body">
+          <div class="api-h1">Private Viewset Instance</div>
+          <div class="api-endpoint-box"><b>GET</b> /api/v2/private/${viewName}/</div>
+          <div class="api-code">HTTP 200 OK
+<span class="c">Content-Type: application/json</span>
+
+{
+  <span class="k">"url"</span>: <span class="s">"https://api-vquery.ditp.go.th/api/v2/private/${viewName}"</span>,
+  <span class="k">"total"</span>: <span class="n">28852161</span>,
+  <span class="k">"example"</span>: [
+    {
+${exampleRow}
+    }
+  ]
+}</div>
+          <div class="api-section-label">POST — query with filter (cURL)</div>
+          <div class="api-curl">curl -X POST "https://api-vquery.ditp.go.th/open/api/v2/${viewName}/data" \\
+  -H "Authorization: Api-Key {api_access_token}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+  "page": 1,
+  "page_size": 1000,
+  "filter": { "${filterKey}": "{value}" }
+}'</div>
+        </div>
+      </div>
+    </div>`;
+  document.addEventListener('keydown', apiDocEscHandler);
+}
+function apiDocEscHandler(e){ if(e.key==='Escape'){ closeApiDocModal(); } }
+function closeApiDocModal(){ document.getElementById('fullPageHost').innerHTML=''; document.removeEventListener('keydown', apiDocEscHandler); }
+
 const SQ_TYPE_OPTIONS = ['สตริง (String)','จำนวนเต็ม (Integer)','ทศนิยม (Float)','บูลีน (Boolean)','วันที่ (Date)','วันเวลา (Timestamp)'];
 function sqTypeLabel(t){
   switch(t){
@@ -3357,24 +3562,27 @@ function sqTypeLabel(t){
   }
 }
 const SQ_CATEGORY_OPTIONS = [
+  'Data Engineering / Data Quality (ETL Pipeline)',
   'เกษตรกรรม','การศึกษา','การท่องเที่ยวและกีฬา','การเมืองและการปกครอง',
   'ความมั่นคงและการต่างประเทศ','คมนาคมและโลจิสติกส์','ทรัพยากรธรรมชาติและสิ่งแวดล้อม',
   'เทคโนโลยีสารสนเทศและการสื่อสาร','เศรษฐกิจ การเงิน และอุตสาหกรรม','ประชากรและสังคม',
   'พลังงาน','สาธารณสุข','กฎหมาย ศาล และอาชญากรรม','การบริหารภาครัฐ'
 ];
-const SQ_FREQ_OPTIONS = ['รายวัน (Daily)','รายสัปดาห์ (Weekly)','รายเดือน (Monthly)','รายไตรมาส (Quarterly)','รายปี (Yearly)','ไม่สม่ำเสมอ (Irregular)','แบบเรียลไทม์ (Real-time)'];
-const SQ_VISIBILITY_OPTIONS = ['ข้อมูลสาธารณะ (Public)','ภายในหน่วยงาน (Internal)','จำกัดสิทธิ์การเข้าถึง (Restricted)','ข้อมูลส่วนบุคคล (Private)'];
-const SQ_LICENSE_OPTIONS = ['Open Government License (OGL)','Creative Commons Attribution 4.0 (CC-BY 4.0)','Creative Commons Zero (CC0)','สงวนสิทธิ์ทั้งหมด (All Rights Reserved)','อื่นๆ (Other)'];
+const SQ_FREQ_OPTIONS = ['Simulated Daily Batch — Last 5 days','รายวัน (Daily)','รายสัปดาห์ (Weekly)','รายเดือน (Monthly)','รายไตรมาส (Quarterly)','รายปี (Yearly)','ไม่สม่ำเสมอ (Irregular)','แบบเรียลไทม์ (Real-time)'];
+const SQ_VISIBILITY_OPTIONS = ['Internal / Sample Dataset','ข้อมูลสาธารณะ (Public)','ภายในหน่วยงาน (Internal)','จำกัดสิทธิ์การเข้าถึง (Restricted)','ข้อมูลส่วนบุคคล (Private)'];
+const SQ_LICENSE_OPTIONS = ['None (Internal Sandbox Data)','Open Government License (OGL)','Creative Commons Attribution 4.0 (CC-BY 4.0)','Creative Commons Zero (CC0)','สงวนสิทธิ์ทั้งหมด (All Rights Reserved)','อื่นๆ (Other)'];
 
 let sqState = null; let sqActiveTab = 'details';
 
 function openSaveQueryModal(){
   const cols = collectSelectedColumns();
   sqState = {
-    title: '', description: '', publisher: '', category: '', keywordsList: [], keywordDraft: '',
-    updateFrequency: '', visibility: SQ_VISIBILITY_OPTIONS[0], license: SQ_LICENSE_OPTIONS[0],
-    dictOverview: '', terms: [ {term:'', definition:''} ],
-    columns: cols.length ? cols.map(c=>({ name: `${c.table}.${c.col}`, type: sqTypeLabel(c.type), nullable: false, description: '' })) : [ {name:'', type:SQ_TYPE_OPTIONS[0], nullable:false, description:''} ]
+    title: 'Data Quality Pipeline Results (Simulated Data)',
+    description: 'Data simulated via generate_complex_data() and processed through Monad-based Pipeline before exporting to Hive-Partitioned Parquet with Quality Summary embedded in Footer Metadata.',
+    publisher: 'Data Engineering Team (Internal Colab Notebook)',
+    category: SQ_CATEGORY_OPTIONS[0], keywordsList: [], keywordDraft: '',
+    updateFrequency: SQ_FREQ_OPTIONS[0], visibility: SQ_VISIBILITY_OPTIONS[0], license: SQ_LICENSE_OPTIONS[0],
+    columns: cols.length ? cols.map(c=>({ name: `${c.table}.${c.col}`, type: sqTypeLabel(c.type), description: '' })) : [ {name:'', type:SQ_TYPE_OPTIONS[0], description:''} ]
   };
   sqActiveTab = 'details'; renderSaveQueryModal();
 }
@@ -3388,9 +3596,8 @@ function renderSaveQueryModal(){
   const host = document.getElementById('modalHost');
   if(!sqState) return;
   const tabsHtml = `
-    <button class="sq-tab ${sqActiveTab==='details'?'active':''}" data-sqtab="details">Dataset Details</button>
-    <button class="sq-tab ${sqActiveTab==='dict'?'active':''}" data-sqtab="dict">Data Dictionary</button>
-    <button class="sq-tab ${sqActiveTab==='cols'?'active':''}" data-sqtab="cols">Column Metadata</button>
+    <button class="sq-tab ${sqActiveTab==='details'?'active':''}" data-sqtab="details">Data Product Details</button>
+    <button class="sq-tab ${sqActiveTab==='cols'?'active':''}" data-sqtab="cols">Data Dictionary</button>
   `;
   let bodyHtml = '';
   if(sqActiveTab==='details'){
@@ -3440,53 +3647,23 @@ function renderSaveQueryModal(){
         </select>
       </div>
     `;
-  } else if(sqActiveTab==='dict'){
-    bodyHtml = `
-      <div class="sq-desc">Define business terms, formulas, and context associated with this dataset.</div>
-      <div class="sq-field">
-        <label class="sq-label" style="font-weight:800;">Dictionary Overview :</label>
-        <textarea class="sq-textarea" id="sqDictOverview" style="min-height:64px" placeholder="คำอธิบายภาพรวมของคำศัพท์ที่ใช้ในชุดข้อมูลนี้...">${escapeHtml(sqState.dictOverview)}</textarea>
-      </div>
-      <div class="sq-table-wrap">
-        <table class="sq-table">
-          <colgroup><col style="width:34%"><col><col style="width:48px"></colgroup>
-          <thead><tr><th>Business Term</th><th>Definition</th><th></th></tr></thead>
-          <tbody>
-            ${sqState.terms.map((t,i)=>`
-              <tr>
-                <td><input class="sq-cell-input" data-term-field="term" data-idx="${i}" placeholder="เช่น ผู้ใช้งานที่ใช้งานอยู่ (Active User)" value="${escapeAttr(t.term)}"></td>
-                <td><input class="sq-cell-input" data-term-field="definition" data-idx="${i}" placeholder="เช่น ผู้ใช้งานที่เข้าสู่ระบบภายใน 30 วันที่ผ่านมา" value="${escapeAttr(t.definition)}"></td>
-                <td><button class="sq-row-del" data-term-del="${i}" title="Delete this row">${ICONS.trash}</button></td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-      <button class="sq-add-link" id="sqAddTerm">${ICONS.plus} Add Term</button>
-    `;
   } else {
     bodyHtml = `
-      <div class="sq-desc">Map and define the metadata for the specific data columns generated by this query.</div>
+      <div class="sq-desc">Metadata for the specific data columns generated by this query. Read-only.</div>
       <div class="sq-table-wrap">
         <table class="sq-table">
-          <colgroup><col style="width:26%"><col style="width:16%"><col style="width:14%"><col><col style="width:48px"></colgroup>
-          <thead><tr><th>Column Name</th><th>Data Type</th><th style="text-align:center">Nullable</th><th>Description</th><th></th></tr></thead>
+          <colgroup><col style="width:30%"><col style="width:18%"><col></colgroup>
+          <thead><tr><th>Column Name</th><th>Data Type</th><th>Description</th></tr></thead>
           <tbody>
-            ${sqState.columns.map((c,i)=>`
+            ${sqState.columns.map((c)=>`
               <tr>
-                <td><input class="sq-cell-input" data-col-field="name" data-idx="${i}" placeholder="เช่น user_id" value="${escapeAttr(c.name)}"></td>
-                <td>
-                  <select class="sq-cell-input" data-col-field="type" data-idx="${i}">
-                    ${SQ_TYPE_OPTIONS.map(o=>`<option value="${escapeAttr(o)}" ${o===c.type?'selected':''}>${escapeHtml(o)}</option>`).join('')}
-                  </select>
-                </td>
-                <td style="text-align:center"><span class="sq-check ${c.nullable?'checked':''}" data-col-null="${i}">${ICONS.check}</span></td>
-                <td><input class="sq-cell-input" data-col-field="description" data-idx="${i}" placeholder="คำอธิบายของคอลัมน์นี้..." value="${escapeAttr(c.description)}"></td>
-                <td><button class="sq-row-del" data-col-del="${i}" title="Delete this row">${ICONS.trash}</button></td>
+                <td>${escapeHtml(c.name)}</td>
+                <td>${escapeHtml(c.type)}</td>
+                <td>${escapeHtml(c.description)}</td>
               </tr>`).join('')}
           </tbody>
         </table>
       </div>
-      <button class="sq-add-link" id="sqAddCol">${ICONS.plus} Add Column</button>
     `;
   }
 
@@ -3515,7 +3692,7 @@ function wireSaveQueryModal(){
   document.getElementById('sqCancelBtn').addEventListener('click', closeSaveQueryModal);
   document.getElementById('sqSaveBtn').addEventListener('click', ()=>{
     if(!sqValid()) return;
-    const title = sqState.title; closeSaveQueryModal(); addSavedView(title);
+    const title = sqState.title; const cols = sqState.columns; closeSaveQueryModal(); addSavedView(title, cols);
     showToast('success', `Query "${title}" saved successfully and a view has been created`);
   });
 
@@ -3539,33 +3716,6 @@ function wireSaveQueryModal(){
     const licEl = document.getElementById('sqLicense'); licEl.addEventListener('change', ()=>{ sqState.license = licEl.value; sqSyncSaveBtn(); });
   }
 
-  if(sqActiveTab==='dict'){
-    const ov = document.getElementById('sqDictOverview'); ov.addEventListener('input', ()=>{ sqState.dictOverview = ov.value; });
-    document.querySelectorAll('[data-term-field]').forEach(inp=>{
-      inp.addEventListener('input', ()=>{ sqState.terms[+inp.dataset.idx][inp.dataset.termField] = inp.value; });
-    });
-    document.querySelectorAll('[data-term-del]').forEach(b=>{
-      b.addEventListener('click', ()=>{ sqState.terms.splice(+b.dataset.termDel, 1); renderSaveQueryModal(); });
-    });
-    document.getElementById('sqAddTerm').addEventListener('click', ()=>{ sqState.terms.push({term:'', definition:''}); renderSaveQueryModal(); });
-  }
-
-  if(sqActiveTab==='cols'){
-    document.querySelectorAll('[data-col-field]').forEach(inp=>{
-      const ev = inp.tagName==='SELECT' ? 'change' : 'input';
-      inp.addEventListener(ev, ()=>{ sqState.columns[+inp.dataset.idx][inp.dataset.colField] = inp.value; });
-    });
-    document.querySelectorAll('[data-col-null]').forEach(chk=>{
-      chk.addEventListener('click', ()=>{
-        const idx = +chk.dataset.colNull; sqState.columns[idx].nullable = !sqState.columns[idx].nullable;
-        chk.classList.toggle('checked', sqState.columns[idx].nullable);
-      });
-    });
-    document.querySelectorAll('[data-col-del]').forEach(b=>{
-      b.addEventListener('click', ()=>{ sqState.columns.splice(+b.dataset.colDel, 1); renderSaveQueryModal(); });
-    });
-    document.getElementById('sqAddCol').addEventListener('click', ()=>{ sqState.columns.push({name:'', type:SQ_TYPE_OPTIONS[0], nullable:false, description:''}); renderSaveQueryModal(); });
-  }
 }
 
 function showToast(type, msg){
