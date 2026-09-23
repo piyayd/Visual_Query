@@ -595,7 +595,7 @@ table.sq-table thead th{
   text-align:left; font-size:12.5px; font-weight:700; color:var(--fg-primary); background:var(--bg-subtle);
   padding:10px 12px; border-bottom:1px solid var(--gray-200b); font-family:var(--font-ui);
 }
-table.sq-table tbody td{ padding:7px 10px; border-bottom:1px solid var(--bg-muted); vertical-align:middle; }
+table.sq-table tbody td{ padding:7px 10px; border-bottom:1px solid var(--bg-muted); vertical-align:middle; font-size:12.5px; font-family:var(--font-ui); color:var(--fg-secondary); line-height:1.5; }
 table.sq-table tbody tr:last-child td{ border-bottom:none; }
 .sq-cell-input{
   width:100%; border:1.5px solid var(--gray-300); border-radius:6px; padding:7px 9px; font-size:12.5px;
@@ -3555,6 +3555,26 @@ ${exampleRow}
 function apiDocEscHandler(e){ if(e.key==='Escape'){ closeApiDocModal(); } }
 function closeApiDocModal(){ document.getElementById('fullPageHost').innerHTML=''; document.removeEventListener('keydown', apiDocEscHandler); }
 
+const SQ_COLUMN_DESC = {
+  Track: { TrackId:'รหัสประจำเพลง (Primary Key)', Name:'ชื่อเพลง', AlbumId:'รหัสอ้างอิงอัลบั้มที่เพลงนี้สังกัด (Foreign Key)', MediaTypeId:'รหัสอ้างอิงประเภทไฟล์สื่อของเพลง (Foreign Key)', GenreId:'รหัสอ้างอิงแนวเพลง (Foreign Key)', Composer:'ชื่อผู้ประพันธ์เพลง', Milliseconds:'ความยาวของเพลง หน่วยเป็นมิลลิวินาที', Bytes:'ขนาดไฟล์เพลง หน่วยเป็นไบต์', UnitPrice:'ราคาขายต่อหน่วยของเพลง' },
+  Album: { AlbumId:'รหัสประจำอัลบั้ม (Primary Key)', Title:'ชื่ออัลบั้ม', ArtistId:'รหัสอ้างอิงศิลปินเจ้าของอัลบั้ม (Foreign Key)' },
+  Artist: { ArtistId:'รหัสประจำศิลปิน (Primary Key)', Name:'ชื่อศิลปินหรือวงดนตรี' },
+  Customer: { CustomerId:'รหัสประจำลูกค้า (Primary Key)', FirstName:'ชื่อจริงของลูกค้า', LastName:'นามสกุลของลูกค้า', Company:'ชื่อบริษัทของลูกค้า (ถ้ามี)', Address:'ที่อยู่สำหรับติดต่อของลูกค้า', City:'เมืองที่ลูกค้าอาศัยอยู่', State:'รัฐ/จังหวัดของลูกค้า', Country:'ประเทศของลูกค้า', PostalCode:'รหัสไปรษณีย์ของลูกค้า', Phone:'หมายเลขโทรศัพท์ติดต่อลูกค้า', Fax:'หมายเลขโทรสารของลูกค้า', Email:'อีเมลติดต่อของลูกค้า', SupportRepId:'รหัสอ้างอิงพนักงานฝ่ายบริการที่ดูแลลูกค้ารายนี้ (Foreign Key)' },
+  Employee: { EmployeeId:'รหัสประจำพนักงาน (Primary Key)', LastName:'นามสกุลของพนักงาน', FirstName:'ชื่อจริงของพนักงาน', Title:'ตำแหน่งงานของพนักงาน', ReportsTo:'รหัสอ้างอิงหัวหน้างานที่พนักงานรายงานตรง (Foreign Key)', BirthDate:'วันเกิดของพนักงาน', HireDate:'วันที่เริ่มงานของพนักงาน', Address:'ที่อยู่ของพนักงาน', City:'เมืองที่พนักงานอาศัยอยู่', State:'รัฐ/จังหวัดของพนักงาน', Country:'ประเทศของพนักงาน', PostalCode:'รหัสไปรษณีย์ของพนักงาน', Phone:'หมายเลขโทรศัพท์ของพนักงาน', Fax:'หมายเลขโทรสารของพนักงาน', Email:'อีเมลของพนักงาน' },
+  Genre: { GenreId:'รหัสประจำแนวเพลง (Primary Key)', Name:'ชื่อแนวเพลง' },
+  Invoice: { InvoiceId:'รหัสประจำใบแจ้งหนี้ (Primary Key)', CustomerId:'รหัสอ้างอิงลูกค้าเจ้าของใบแจ้งหนี้ (Foreign Key)', InvoiceDate:'วันที่ออกใบแจ้งหนี้', BillingAddress:'ที่อยู่สำหรับเรียกเก็บเงิน', BillingCity:'เมืองสำหรับเรียกเก็บเงิน', BillingState:'รัฐ/จังหวัดสำหรับเรียกเก็บเงิน', BillingCountry:'ประเทศสำหรับเรียกเก็บเงิน', BillingPostalCode:'รหัสไปรษณีย์สำหรับเรียกเก็บเงิน', Total:'ยอดรวมสุทธิของใบแจ้งหนี้' },
+  InvoiceLine: { InvoiceLineId:'รหัสประจำรายการในใบแจ้งหนี้ (Primary Key)', InvoiceId:'รหัสอ้างอิงใบแจ้งหนี้ (Foreign Key)', TrackId:'รหัสอ้างอิงเพลงที่ถูกซื้อ (Foreign Key)', UnitPrice:'ราคาต่อหน่วยของเพลงในรายการนี้', Quantity:'จำนวนที่สั่งซื้อในรายการนี้' },
+  MediaType: { MediaTypeId:'รหัสประจำประเภทไฟล์สื่อ (Primary Key)', Name:'ชื่อประเภทไฟล์สื่อ' },
+  Playlist: { PlaylistId:'รหัสประจำเพลย์ลิสต์ (Primary Key)', Name:'ชื่อเพลย์ลิสต์' },
+  PlaylistTrack: { PlaylistId:'รหัสอ้างอิงเพลย์ลิสต์ (Foreign Key)', TrackId:'รหัสอ้างอิงเพลงที่อยู่ในเพลย์ลิสต์ (Foreign Key)' }
+};
+function sqMockDescription(table, col){
+  const hit = SQ_COLUMN_DESC[table] && SQ_COLUMN_DESC[table][col];
+  if(hit) return hit;
+  if(/Id$/.test(col)) return `รหัสอ้างอิงข้อมูล ${col} ของตาราง ${table}`;
+  if(/Date$/.test(col)) return `วันที่ที่เกี่ยวข้องกับ ${table} (${col})`;
+  return `ข้อมูลคอลัมน์ ${col} ของตาราง ${table}`;
+}
 const SQ_TYPE_OPTIONS = ['สตริง (String)','จำนวนเต็ม (Integer)','ทศนิยม (Float)','บูลีน (Boolean)','วันที่ (Date)','วันเวลา (Timestamp)'];
 function sqTypeLabel(t){
   switch(t){
@@ -3582,7 +3602,7 @@ function openSaveQueryModal(){
     publisher: 'Data Engineering Team (Internal Colab Notebook)',
     category: SQ_CATEGORY_OPTIONS[0], keywordsList: [], keywordDraft: '',
     updateFrequency: SQ_FREQ_OPTIONS[0], visibility: SQ_VISIBILITY_OPTIONS[0], license: SQ_LICENSE_OPTIONS[0],
-    columns: cols.length ? cols.map(c=>({ name: `${c.table}.${c.col}`, type: sqTypeLabel(c.type), description: '' })) : [ {name:'', type:SQ_TYPE_OPTIONS[0], description:''} ]
+    columns: cols.length ? cols.map(c=>({ name: `${c.table}.${c.col}`, type: sqTypeLabel(c.type), description: sqMockDescription(c.table, c.col) })) : [ {name:'', type:SQ_TYPE_OPTIONS[0], description:''} ]
   };
   sqActiveTab = 'details'; renderSaveQueryModal();
 }
